@@ -2,68 +2,112 @@ import { questions } from './quiz-data.js';
 
 const artKeys = [...new Set(questions.flatMap(({ choices }) => choices.map(({ art }) => art)))];
 
-export const illustrations = Object.fromEntries(artKeys.map((art) => [art, art]));
+const scene = (name, paths) => ({ name, paths });
+
+const scenes = {
+  megaphone: scene('megaphone with ringing alarm', ['M28 68 L63 48 L63 86 L28 74 Z', 'M63 54 C78 55 90 62 96 74', 'M63 82 C78 81 90 74 96 62', 'M31 74 L24 92', 'M83 35 L92 24 M96 46 L108 41']),
+  chat: scene('chat bubble check-in sticker', ['M24 36 C24 27 33 23 45 23 L77 23 C90 23 98 31 98 43 L98 62 C98 74 89 81 76 81 L52 81 L33 94 L38 79 C29 76 24 69 24 58 Z', 'M42 49 C49 42 61 42 68 49', 'M45 61 C54 69 68 68 76 57']),
+  pillow: scene('sleepy pillow with phone call', ['M29 48 C35 35 84 34 92 47 C99 58 92 82 80 87 C65 94 36 88 29 76 C24 67 24 57 29 48 Z', 'M40 63 C50 70 67 70 78 62', 'M84 29 C91 33 96 39 98 47', 'M92 23 C103 28 110 38 111 50']),
+  cave: scene('quiet cave entrance', ['M21 91 C29 54 44 31 62 28 C81 25 96 48 105 91', 'M42 91 C43 65 50 51 63 50 C76 49 84 65 85 91', 'M29 91 L99 91', 'M72 38 L79 31 M43 48 L35 42']),
+  basket: scene('shopping basket promotion', ['M28 52 L92 52 L83 91 L38 91 Z', 'M43 52 C44 35 76 35 78 52', 'M41 64 L79 64 M38 76 L82 76', 'M54 44 C61 49 70 48 75 41']),
+  wave: scene('waving hello hand', ['M38 85 C31 72 28 57 36 52 C42 48 48 58 51 67', 'M51 67 L48 34 C48 27 59 27 60 35 L63 63', 'M63 63 L67 31 C68 25 78 26 78 34 L76 65', 'M76 65 L84 41 C86 35 95 38 93 45 L84 78', 'M39 31 C31 36 27 45 29 54 M26 20 C15 30 11 43 16 57']),
+  cap: scene('ninja nod cap', ['M25 61 C39 42 76 37 100 55', 'M31 61 C45 71 79 71 96 58', 'M45 56 C54 51 70 50 82 56', 'M35 68 L29 83 M88 67 L98 80']),
+  sneak: scene('sneaking into snack aisle', ['M25 67 C37 56 52 52 66 57 C79 62 88 72 96 87', 'M40 67 C50 73 61 73 72 66', 'M75 45 C84 43 94 46 101 54', 'M82 55 C89 59 97 59 105 54']),
+  map: scene('folded cafe hopping map', ['M24 36 L48 27 L72 36 L96 27 L96 86 L72 95 L48 86 L24 95 Z', 'M48 27 L48 86 M72 36 L72 95', 'M37 57 C47 48 60 49 67 59 C73 68 84 68 91 58', 'M38 76 C44 72 49 72 55 77']),
+  grill: scene('moo kratha grill pan', ['M25 70 C31 54 88 54 96 70 C91 91 33 91 25 70 Z', 'M42 60 C45 44 74 44 78 60', 'M42 75 C51 80 69 80 79 74', 'M34 46 C30 37 39 32 35 23 M59 43 C55 33 65 30 62 20 M82 45 C78 36 88 32 84 24']),
+  cat: scene('cat watching series', ['M35 78 C34 58 45 44 61 44 C77 44 89 58 87 78 C76 89 48 90 35 78 Z', 'M44 48 L39 31 L54 42 M76 47 L87 31 L82 51', 'M51 64 L51 64 M72 64 L72 64', 'M57 73 C62 77 68 76 72 72', 'M24 86 L98 86']),
+  moon: scene('do not disturb moon', ['M75 25 C55 31 44 49 48 68 C53 88 74 98 94 88 C81 85 71 76 68 63 C65 49 68 36 75 25 Z', 'M31 36 L39 42 M39 36 L31 42', 'M24 67 L34 76 M34 67 L24 76']),
+  mic: scene('karaoke microphone', ['M52 24 C64 18 77 25 81 39 C85 53 78 66 65 70 C51 74 39 66 36 52 C32 39 39 29 52 24 Z', 'M63 70 L75 101', 'M56 99 L94 86', 'M45 45 C52 52 64 54 73 48']),
+  note: scene('music note hook', ['M70 28 L70 77', 'M70 28 C80 35 89 37 96 34', 'M70 76 C62 70 48 72 43 82 C39 91 48 98 59 94 C68 91 72 84 70 76 Z', 'M35 51 C43 45 52 45 59 52']),
+  pass: scene('passing the microphone', ['M29 71 C38 60 51 60 60 70', 'M59 70 C70 82 86 81 96 69', 'M37 61 L51 48 L68 66 L54 79 Z', 'M74 59 L88 46 L103 62 L89 75 Z']),
+  tree: scene('hiding behind a tree', ['M58 28 C42 29 31 40 33 55 C20 61 23 81 40 83 C48 96 72 96 80 83 C99 81 102 61 88 54 C89 40 75 28 58 28 Z', 'M61 79 L61 105 M51 105 L71 105', 'M43 70 C51 65 60 65 68 70', 'M29 91 C35 84 43 83 49 89']),
+  fire: scene('meme fire spark', ['M61 100 C39 93 34 73 48 58 C58 48 56 36 53 24 C73 36 88 52 85 72 C83 91 72 99 61 100 Z', 'M62 88 C53 83 54 72 64 62 C72 70 76 81 62 88 Z', 'M31 37 L40 43 M88 29 L78 42 M96 52 L108 50']),
+  noodle: scene('noodle bowl dinner', ['M27 67 C31 89 88 89 94 67 Z', 'M31 67 C43 59 78 59 91 67', 'M46 54 C41 43 55 40 49 29 M60 55 C56 43 70 40 64 29 M74 55 C70 43 84 40 78 29', 'M37 78 C50 84 73 84 84 78']),
+  book: scene('quiet open book', ['M24 38 C39 31 51 33 61 43 L61 92 C49 83 36 82 24 88 Z', 'M61 43 C72 33 84 31 96 38 L96 88 C84 82 72 83 61 92 Z', 'M38 50 C45 48 52 50 57 55 M70 55 C77 50 84 49 91 51']),
+  bell: scene('muted notification bell', ['M40 74 C43 64 43 51 44 43 C46 31 55 25 65 25 C77 25 84 34 86 45 C87 53 87 64 91 74', 'M34 74 L96 74', 'M57 82 C61 89 70 89 74 82', 'M27 31 L98 94']),
+  stage: scene('stage host spotlight', ['M31 84 L89 84 L97 100 L23 100 Z', 'M42 84 L42 48 C43 38 55 34 63 40 C70 45 71 58 64 64', 'M64 64 L83 45', 'M36 30 C52 20 73 20 89 31']),
+  badge: scene('game badge medal', ['M60 25 C77 25 91 39 91 56 C91 73 77 87 60 87 C43 87 29 73 29 56 C29 39 43 25 60 25 Z', 'M60 39 L65 51 L78 52 L68 60 L72 73 L60 66 L48 73 L52 60 L42 52 L55 51 Z', 'M49 85 L43 103 M71 85 L77 103']),
+  flag: scene('cheering flag', ['M36 102 L36 28', 'M36 31 C53 21 67 39 86 28 L86 63 C68 74 53 56 36 66', 'M27 102 L49 102', 'M72 80 C82 77 93 80 101 87']),
+  door: scene('open restroom escape door', ['M38 30 L81 22 L81 94 L38 94 Z', 'M47 38 L72 33 L72 86 L47 90 Z', 'M66 61 L66 61', 'M20 94 L99 94']),
+  clock: scene('opening hours clock', ['M60 24 C80 24 96 40 96 60 C96 81 80 96 60 96 C39 96 24 81 24 60 C24 40 39 24 60 24 Z', 'M60 37 L60 62 L78 72', 'M32 31 L24 22 M88 31 L97 22']),
+  star: scene('mystic city star', ['M60 24 L68 48 L94 48 L72 62 L81 88 L60 73 L39 88 L48 62 L26 48 L52 48 Z', 'M24 89 C39 82 55 82 70 89 C82 94 94 94 105 87']),
+  plane: scene('one-way paper plane', ['M22 62 L101 27 L78 96 L61 70 Z', 'M61 70 L101 27', 'M61 70 L46 92 L48 73 Z', 'M31 31 C42 27 54 28 63 35']),
+  rain: scene('rain cloud forecast', ['M31 59 C23 58 19 48 24 40 C29 32 39 32 45 37 C51 26 72 26 80 39 C92 38 101 47 98 59 C95 70 81 71 69 70 L35 70', 'M39 82 L34 96 M58 82 L53 100 M77 82 L72 96']),
+  shirt: scene('laundry shirt on hanger', ['M39 37 L54 29 C58 37 65 37 69 29 L84 37 L99 56 L86 68 L81 58 L81 95 L39 95 L39 58 L34 68 L21 56 Z', 'M48 34 C54 43 69 43 75 34']),
+  cosmos: scene('cosmos signal orbit', ['M60 50 C70 50 78 58 78 68 C78 78 70 86 60 86 C50 86 42 78 42 68 C42 58 50 50 60 50 Z', 'M27 69 C45 43 76 31 96 43 C112 53 103 77 77 88 C50 100 23 93 20 77', 'M33 32 L40 39 M94 25 L86 39 M101 91 L111 97']),
+  dragon: scene('small job-hunting dragon', ['M26 77 C40 50 63 44 80 59 C91 69 88 86 75 92 C57 101 38 92 26 77 Z', 'M79 57 L94 39 L93 62', 'M51 51 L44 32 L63 45', 'M73 72 C81 75 89 73 96 66', 'M48 82 C57 87 68 86 76 80']),
+  pin: scene('place pin with shop name memory', ['M60 22 C77 22 91 35 91 52 C91 73 60 99 60 99 C60 99 29 73 29 52 C29 35 43 22 60 22 Z', 'M60 41 C67 41 72 46 72 53 C72 60 67 65 60 65 C53 65 48 60 48 53 C48 46 53 41 60 41 Z', 'M35 100 C50 106 70 106 86 100']),
+  list: scene('event sequence checklist', ['M35 28 L91 28 M35 48 L91 48 M35 68 L91 68 M35 88 L91 88', 'M20 28 L24 32 L31 22', 'M20 48 L24 52 L31 42', 'M20 68 L24 72 L31 62', 'M20 88 L24 92 L31 82']),
+  heart: scene('hidden feeling heart', ['M60 91 C38 73 27 61 29 46 C31 32 49 28 60 43 C71 28 89 32 91 46 C94 61 82 73 60 91 Z', 'M43 58 C52 64 68 64 77 57', 'M48 47 L48 47 M72 47 L72 47']),
+  film: scene('movie sequel clapperboard', ['M28 39 L92 30 L98 87 L33 95 Z', 'M31 51 L94 42', 'M40 37 L50 49 M58 34 L68 46 M76 32 L86 43', 'M45 69 C56 60 70 60 82 69']),
+  mug: scene('everyday mug', ['M34 42 L76 42 L72 88 C68 96 43 96 38 88 Z', 'M76 53 C94 49 100 68 87 78 C82 82 77 81 73 77', 'M43 30 C39 23 49 20 45 13 M59 30 C55 23 65 20 61 13']),
+  ticket: scene('favorite shop coupon ticket', ['M25 45 C34 44 39 38 39 30 L96 30 L96 90 L39 90 C39 82 34 76 25 75 Z', 'M49 43 L83 43 M49 61 L78 61', 'M42 30 L42 90']),
+  box: scene('mystery galaxy box', ['M31 50 L60 32 L91 50 L60 68 Z', 'M31 50 L31 82 L60 101 L60 68', 'M91 50 L91 82 L60 101', 'M60 32 L60 18 M48 24 C55 18 65 18 72 24', 'M77 73 L87 66 M39 73 L49 66']),
+  key: scene('treasure clue key', ['M76 44 C86 34 103 41 103 56 C103 69 88 77 77 69 C67 60 67 52 76 44 Z', 'M75 68 L39 100', 'M52 88 L43 79 M44 95 L34 86', 'M91 55 L91 55']),
+  recipe: scene('ingredient recipe card', ['M32 25 L87 25 L87 96 L32 96 Z', 'M43 43 L75 43 M43 58 L78 58 M43 73 L67 73', 'M73 25 L73 38 L87 38']),
+  menu: scene('restaurant menu question', ['M31 27 L89 27 L89 94 L31 94 Z', 'M44 43 L76 43 M44 58 L76 58 M44 73 L64 73', 'M77 78 C87 73 95 78 95 88']),
+  sparkle: scene('lucky sparkle charm', ['M60 21 L67 49 L96 57 L68 65 L60 94 L52 65 L24 57 L53 49 Z', 'M28 28 L36 36 M90 27 L82 39 M31 89 L42 80 M91 88 L80 78']),
+  rocket: scene('curious rocket launch', ['M60 22 C80 36 88 57 78 78 L58 98 L42 82 L50 57 C53 43 55 32 60 22 Z', 'M59 47 C66 47 71 52 71 59 C71 66 66 71 59 71 C52 71 47 66 47 59 C47 52 52 47 59 47 Z', 'M43 81 L25 91 M77 78 L96 86', 'M52 96 C47 103 39 107 31 107 C35 99 40 94 48 91']),
+  tool: scene('repair wrench', ['M80 24 C69 25 62 33 62 43 C62 48 64 52 67 56 L30 93 C26 97 26 103 30 107 C34 111 40 111 44 107 L81 70 C85 73 90 75 96 74 C106 73 114 64 114 54 L99 65 L88 61 L84 50 L95 38 C91 28 86 24 80 24 Z']),
+  search: scene('searching for symptoms', ['M53 28 C68 28 80 40 80 55 C80 70 68 82 53 82 C38 82 26 70 26 55 C26 40 38 28 53 28 Z', 'M75 77 L100 102', 'M42 54 C50 48 59 48 66 55']),
+  scroll: scene('legend scroll', ['M31 35 C31 27 43 26 45 35 L45 87 C45 96 31 96 31 87 Z', 'M45 35 L91 35 C100 35 100 49 91 49 L91 87 L45 87', 'M55 52 L82 52 M55 68 L75 68']),
+  bulb: scene('system redesign lightbulb', ['M60 22 C76 22 89 35 89 52 C89 63 83 72 75 78 L75 91 L45 91 L45 78 C37 72 31 63 31 52 C31 35 44 22 60 22 Z', 'M47 101 L73 101 M50 91 L70 91', 'M60 8 L60 15 M26 22 L35 31 M94 22 L85 31']),
+  chart: scene('pros and cons chart', ['M28 94 L97 94 M33 84 L33 55 M55 84 L55 37 M77 84 L77 63', 'M28 34 L45 34 M28 47 L45 47', 'M70 25 L91 25 M80 15 L80 36']),
+  check: scene('first help check mark', ['M27 63 L50 85 L95 35', 'M31 96 C49 103 75 103 94 94', 'M27 32 C43 22 72 22 92 33']),
+  hug: scene('hug and comfort snack', ['M33 69 C39 47 55 39 60 57 C65 39 81 47 87 69 C79 89 41 89 33 69 Z', 'M27 73 C37 85 48 91 60 91 C72 91 83 85 93 73', 'M43 50 C36 47 30 51 28 60 M77 50 C84 47 90 51 92 60']),
+  music: scene('sad playlist', ['M72 25 L72 77', 'M72 25 C82 31 91 32 99 28', 'M72 76 C63 70 49 72 44 82 C40 91 50 97 60 93 C68 90 73 84 72 76 Z', 'M31 39 C37 31 47 31 53 39 C58 47 52 57 42 66 C32 57 26 47 31 39 Z']),
+  file: scene('evidence document', ['M35 23 L73 23 L91 42 L91 97 L35 97 Z', 'M73 23 L73 43 L91 43', 'M47 56 L79 56 M47 72 L79 72 M47 86 L67 86']),
+  rule: scene('shared rule scales', ['M60 23 L60 98 M35 39 L85 39', 'M39 40 L25 68 L53 68 Z', 'M81 40 L67 68 L95 68 Z', 'M47 98 L73 98']),
+  smile: scene('room feeling smile', ['M60 25 C80 25 96 41 96 61 C96 81 80 97 60 97 C40 97 24 81 24 61 C24 41 40 25 60 25 Z', 'M47 54 L47 54 M73 54 L73 54', 'M42 69 C52 81 70 81 80 69']),
+  tea: scene('warm conversation tea cup', ['M31 55 L78 55 L73 88 C68 96 43 96 36 88 Z', 'M78 62 C94 59 100 75 87 83 C82 86 77 84 73 80', 'M42 39 C36 31 48 26 43 18 M59 39 C53 31 65 26 60 18', 'M27 95 L92 95']),
+  receipt: scene('wrong order receipt proof', ['M35 24 L45 31 L55 24 L65 31 L75 24 L85 31 L85 96 L75 89 L65 96 L55 89 L45 96 L35 89 Z', 'M47 47 L75 47 M47 63 L76 63 M47 79 L66 79', 'M75 78 L88 91']),
+  phone: scene('polite correction phone', ['M43 22 L79 22 C85 22 89 26 89 32 L89 92 C89 98 85 102 79 102 L43 102 C37 102 33 98 33 92 L33 32 C33 26 37 22 43 22 Z', 'M49 34 L73 34 M56 91 L66 91', 'M45 57 C54 49 68 49 77 57']),
+  camera: scene('photo before complaint camera', ['M27 43 L45 43 L51 33 L73 33 L80 43 L94 43 L94 91 L27 91 Z', 'M61 53 C72 53 81 62 81 73 C81 84 72 93 61 93 C50 93 41 84 41 73 C41 62 50 53 61 53 Z', 'M80 52 L88 52']),
+  cookie: scene('comfort cookie', ['M61 25 C82 25 97 41 96 62 C95 83 80 96 60 96 C40 96 25 81 25 61 C25 41 41 25 61 25 Z', 'M49 48 L49 48 M73 43 L73 43 M67 71 L67 71 M43 74 L43 74', 'M81 27 C77 35 83 42 94 42']),
+  wrench: scene('problem-solving wrench', ['M81 24 C70 24 62 32 62 43 C62 48 64 53 68 57 L31 94 C27 98 27 104 31 108 C35 112 41 112 45 108 L82 71 C87 75 94 76 101 72 C109 68 114 59 111 50 L98 63 L88 60 L85 50 L98 37 C93 28 88 24 81 24 Z']),
+  grid: scene('system thinking grid', ['M28 28 L92 28 L92 92 L28 92 Z', 'M49 28 L49 92 M71 28 L71 92 M28 49 L92 49 M28 71 L92 71', 'M38 39 L38 39 M60 60 L60 60 M82 82 L82 82']),
+  cloud: scene('comfortable soft cloud', ['M31 67 C20 66 17 52 26 45 C32 39 40 40 45 44 C49 31 70 28 78 43 C91 40 101 49 99 63 C98 75 86 80 73 78 L34 78']),
+  truth: scene('hard truth speech mark', ['M33 34 C48 34 52 47 44 60 C38 69 31 75 28 88', 'M75 34 C90 34 94 47 86 60 C80 69 73 75 70 88', 'M31 94 C46 88 55 79 57 66 M73 94 C88 88 97 79 99 66']),
+  scale: scene('reason and accountability scale', ['M60 22 L60 96 M36 38 L84 38', 'M37 39 L24 66 L50 66 Z', 'M83 39 L70 66 L96 66 Z', 'M46 96 L74 96']),
+  flower: scene('make-up flower', ['M60 58 C49 38 71 38 60 58 C39 47 50 28 60 58 C70 28 81 47 60 58 C49 78 71 78 60 58 Z', 'M60 58 L60 101', 'M60 81 C48 72 37 76 33 88', 'M60 88 C72 76 86 78 92 91']),
+  cake: scene('reconciliation cake', ['M32 57 L88 57 L88 92 L32 92 Z', 'M38 44 C47 35 58 35 66 44 C74 35 85 37 90 49 L90 57 L30 57 L30 49 C31 43 34 41 38 44 Z', 'M45 57 L45 92 M62 57 L62 92 M78 57 L78 92', 'M55 31 L55 43 M72 30 L72 43']),
+  target: scene('clear decision target', ['M60 23 C81 23 97 39 97 60 C97 81 81 97 60 97 C39 97 23 81 23 60 C23 39 39 23 60 23 Z', 'M60 40 C71 40 80 49 80 60 C80 71 71 80 60 80 C49 80 40 71 40 60 C40 49 49 40 60 40 Z', 'M60 55 L60 65 M55 60 L65 60', 'M79 41 L100 20']),
+  folder: scene('resource folder', ['M25 42 L52 42 L60 32 L95 32 L95 92 L25 92 Z', 'M25 50 L95 50', 'M41 70 L77 70 M41 82 L65 82']),
+  ear: scene('good listener ear', ['M58 25 C76 25 88 39 88 57 C88 69 81 76 72 82 C67 85 66 94 58 98 C47 103 36 96 40 86', 'M58 43 C67 42 74 49 74 58 C74 66 67 69 61 73 C55 77 56 85 50 88', 'M32 52 C39 35 51 26 64 24']),
+  sun: scene('better monday sun', ['M60 37 C74 37 84 48 84 61 C84 75 74 85 60 85 C46 85 36 75 36 61 C36 48 46 37 60 37 Z', 'M60 17 L60 28 M60 94 L60 105 M17 61 L29 61 M91 61 L103 61 M29 30 L37 38 M91 30 L83 38 M29 92 L37 84 M91 92 L83 84']),
+  case: scene('checklist suitcase', ['M31 42 L89 42 L89 96 L31 96 Z', 'M47 42 C47 30 73 30 73 42', 'M43 61 L49 67 L60 55 M43 80 L49 86 L60 74', 'M66 62 L80 62 M66 81 L80 81']),
+  bag: scene('night-before travel bag', ['M31 48 L89 48 L95 97 L25 97 Z', 'M45 48 C46 33 75 33 76 48', 'M43 65 L77 65 M39 80 L81 80', 'M86 34 C94 38 99 45 101 54']),
+  socks: scene('grab random socks', ['M40 27 L58 27 L57 66 C57 79 48 89 35 92 C26 94 20 90 20 83 C20 72 33 69 38 62 Z', 'M69 28 L86 32 L78 70 C76 82 66 90 53 89 C45 89 40 84 42 78 C45 69 58 70 64 64 Z']),
+  toothbrush: scene('just toothbrush ready', ['M39 25 L52 25 L52 94 L39 94 Z', 'M52 28 L86 28 M52 38 L88 38', 'M33 94 L58 94', 'M73 57 C84 62 91 71 94 84']),
+  label: scene('everything labeled tag', ['M31 41 L71 27 L98 54 L59 93 L31 65 Z', 'M45 53 L45 53', 'M55 61 L80 50 M49 73 L70 63']),
+  desk: scene('zoned work desk', ['M24 46 L96 46 L90 89 L30 89 Z', 'M38 46 L38 89 M62 46 L62 89', 'M41 34 L79 34 L79 46 L41 46', 'M32 100 L41 89 M88 100 L79 89']),
+  pile: scene('known-by-heart pile', ['M30 69 L87 55 L94 77 L38 92 Z', 'M25 51 L82 37 L89 56 L31 72 Z', 'M36 31 L91 25 L94 43 L39 50 Z', 'M50 72 C58 67 69 66 78 70']),
+  wind: scene('empty desk windy chaos', ['M26 44 C43 34 58 34 72 44 C82 51 93 51 103 43', 'M21 66 C39 55 57 57 73 66 C84 73 95 72 103 64', 'M34 87 C48 80 62 81 74 88', 'M45 28 L38 22 M83 91 L94 99']),
+  calendar: scene('ten-minute itinerary calendar', ['M29 34 L91 34 L91 97 L29 97 Z', 'M29 51 L91 51', 'M43 24 L43 41 M77 24 L77 41', 'M43 64 L54 64 M66 64 L78 64 M43 78 L54 78 M66 78 L78 78']),
+  wallet: scene('budget wallet', ['M28 43 L88 43 C95 43 99 48 99 55 L99 88 C99 95 94 99 88 99 L28 99 Z', 'M28 43 C32 33 77 30 86 43', 'M73 62 L103 62 L103 83 L73 83 Z', 'M88 73 L88 73']),
+  thumb: scene('thumbs up then later', ['M42 94 L25 94 L25 58 L42 58 Z', 'M42 88 C55 91 78 91 87 84 C93 79 91 70 85 69 C93 64 91 54 82 54 L68 54 L72 36 C74 27 64 23 59 31 L44 58', 'M73 72 L86 72']),
+  sleep: scene('sleeping place first', ['M27 83 L96 83 L96 97 L27 97 Z', 'M31 65 C44 52 63 52 76 65 L96 65 L96 83 L27 83 L27 69 C27 67 29 66 31 65 Z', 'M41 38 L62 38 L41 62 L63 62', 'M77 29 L94 29 L77 48 L95 48']),
+  kanban: scene('broken-down kanban board', ['M25 28 L95 28 L95 96 L25 96 Z', 'M48 28 L48 96 M72 28 L72 96', 'M32 42 L42 42 M55 48 L65 48 M79 43 L89 43', 'M32 65 L42 65 M55 70 L65 70 M79 63 L89 63']),
+  date: scene('time block date', ['M29 34 L91 34 L91 96 L29 96 Z', 'M29 51 L91 51', 'M43 24 L43 41 M77 24 L77 41', 'M45 66 C55 58 69 58 78 67', 'M45 80 L76 80']),
+  bolt: scene('deadline energy bolt', ['M69 20 L37 65 L59 65 L49 101 L86 53 L63 53 Z', 'M28 34 C36 27 46 25 56 30 M84 89 C94 84 101 75 103 64']),
+  comet: scene('last-night comet legend', ['M80 31 C91 37 95 51 88 63 C81 75 65 77 54 69 C43 61 40 47 47 36 C54 24 69 24 80 31 Z', 'M47 36 C36 34 27 29 19 21', 'M54 69 C42 78 30 84 17 87', 'M40 54 C30 55 22 58 14 64']),
+  plan: scene('weekly meal plan', ['M32 26 L88 26 L88 96 L32 96 Z', 'M44 44 L76 44 M44 59 L76 59 M44 74 L76 74', 'M42 87 C48 82 57 82 64 87']),
+  fridge: scene('choose from fridge', ['M38 22 L84 22 L84 100 L38 100 Z', 'M38 57 L84 57', 'M47 41 L47 41 M47 76 L47 76', 'M62 36 C70 32 77 35 80 43']),
+  app: scene('scrolling food app', ['M43 22 L78 22 C85 22 89 27 89 34 L89 94 C89 100 85 104 78 104 L43 104 C36 104 32 100 32 94 L32 34 C32 27 36 22 43 22 Z', 'M43 41 L78 41 M43 56 L78 56 M43 71 L78 71', 'M56 92 L66 92', 'M74 82 C82 75 92 74 99 81']),
+  coin: scene('coin deciding fate', ['M60 26 C80 26 95 41 95 61 C95 81 80 96 60 96 C40 96 25 81 25 61 C25 41 40 26 60 26 Z', 'M60 40 C70 40 77 48 77 58 C77 68 70 76 60 76 C50 76 43 68 43 58 C43 48 50 40 60 40 Z', 'M60 18 L60 9 M46 13 C55 8 66 8 75 13']),
+  queue: scene('idea queue', ['M31 31 L88 31 L88 95 L31 95 Z', 'M44 47 L76 47 M44 63 L76 63 M44 79 L66 79', 'M23 47 L28 52 L35 42 M23 63 L28 68 L35 58 M23 79 L28 84 L35 74']),
+  shield: scene('impact check shield', ['M60 23 L94 37 L89 63 C85 82 74 93 60 101 C46 93 35 82 31 63 L26 37 Z', 'M43 62 L55 74 L80 47', 'M40 39 C51 46 69 46 81 39']),
+  jump: scene('excited rabbit jump', ['M48 68 C39 58 42 43 55 39 C69 34 84 45 82 61 C81 76 62 84 48 68 Z', 'M57 40 L45 18 M70 40 L77 17', 'M43 70 L30 88 M76 69 L94 86', 'M65 58 C70 63 75 63 80 58']),
+  tabs: scene('twelve open tabs', ['M22 39 L82 39 L82 90 L22 90 Z', 'M32 30 L92 30 L92 81', 'M42 22 L102 22 L102 73', 'M34 53 L69 53 M34 68 L62 68', 'M89 46 C99 52 106 62 108 74']),
+};
+
+export const illustrations = Object.fromEntries(artKeys.map((art) => [art, { art, ...scenes[art] }]));
 
 const escapeAttribute = (value) => String(value).replaceAll('&', '&amp;').replaceAll('"', '&quot;').replaceAll('<', '&lt;');
 
-const hashArt = (art) => {
-  let hash = 2166136261;
-  for (const char of art) {
-    hash ^= char.charCodeAt(0);
-    hash = Math.imul(hash, 16777619);
-  }
-  return hash >>> 0;
+const renderPaths = ({ paths }) => paths.map((d, index) => `<path d="${d}" fill="none" stroke-width="${index === 0 ? 7 : 5}" />`).join('');
+
+export const renderChoiceIllustration = (art) => {
+  const illustration = illustrations[art];
+  return `<svg class="choice-doodle" data-art="${escapeAttribute(art)}" data-scene="${escapeAttribute(illustration.art)}" aria-hidden="true" viewBox="0 0 120 120" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg">${renderPaths(illustration)}</svg>`;
 };
-
-const point = (seed, index, min, max) => min + (((seed >>> ((index % 4) * 8)) & 255) / 255) * (max - min);
-const bend = (seed, index) => point(seed, index, -7, 7).toFixed(1);
-const nudge = (value, seed, index) => (value + point(seed, index, -4, 4)).toFixed(1);
-
-const doodles = [
-  (seed) => [
-    `M${nudge(28, seed, 1)} ${nudge(64, seed, 2)} C${nudge(34, seed, 3)} ${nudge(31, seed, 4)} ${nudge(78, seed, 5)} ${nudge(26, seed, 6)} ${nudge(90, seed, 7)} ${nudge(56, seed, 8)} C${nudge(100, seed, 9)} ${nudge(86, seed, 10)} ${nudge(58, seed, 11)} ${nudge(98, seed, 12)} ${nudge(35, seed, 13)} ${nudge(79, seed, 14)}`,
-    `M45 ${78 + bend(seed, 15)} C54 ${90 + bend(seed, 16)} 72 ${88 + bend(seed, 17)} 80 ${74 + bend(seed, 18)}`,
-    `M43 ${54 + bend(seed, 19)} l.1 .1 M76 ${52 + bend(seed, 20)} l.1 .1`,
-  ],
-  (seed) => [
-    `M${nudge(31, seed, 1)} ${nudge(82, seed, 2)} C${nudge(44, seed, 3)} ${nudge(48, seed, 4)} ${nudge(61, seed, 5)} ${nudge(32, seed, 6)} ${nudge(89, seed, 7)} ${nudge(28, seed, 8)}`,
-    `M${nudge(32, seed, 9)} ${nudge(83, seed, 10)} C${nudge(57, seed, 11)} ${nudge(80, seed, 12)} ${nudge(76, seed, 13)} ${nudge(67, seed, 14)} ${nudge(90, seed, 15)} ${nudge(29, seed, 16)}`,
-    `M58 ${38 + bend(seed, 17)} C61 ${58 + bend(seed, 18)} 58 ${75 + bend(seed, 19)} 50 ${91 + bend(seed, 20)}`,
-  ],
-  (seed) => [
-    `M${nudge(28, seed, 1)} ${nudge(45, seed, 2)} C${nudge(42, seed, 3)} ${nudge(27, seed, 4)} ${nudge(79, seed, 5)} ${nudge(26, seed, 6)} ${nudge(91, seed, 7)} ${nudge(45, seed, 8)} C${nudge(101, seed, 9)} ${nudge(63, seed, 10)} ${nudge(88, seed, 11)} ${nudge(82, seed, 12)} ${nudge(64, seed, 13)} ${nudge(81, seed, 14)} L${nudge(42, seed, 15)} ${nudge(94, seed, 16)} L${nudge(48, seed, 17)} ${nudge(78, seed, 18)} C${nudge(31, seed, 19)} ${nudge(72, seed, 20)} ${nudge(19, seed, 21)} ${nudge(61, seed, 22)} ${nudge(28, seed, 23)} ${nudge(45, seed, 24)}`,
-    `M41 ${48 + bend(seed, 25)} C51 ${42 + bend(seed, 26)} 69 ${43 + bend(seed, 27)} 82 ${50 + bend(seed, 28)}`,
-    `M41 ${62 + bend(seed, 29)} C54 ${68 + bend(seed, 30)} 70 ${68 + bend(seed, 31)} 82 ${61 + bend(seed, 32)}`,
-  ],
-  (seed) => [
-    `M${nudge(37, seed, 1)} ${nudge(32, seed, 2)} L${nudge(84, seed, 3)} ${nudge(28, seed, 4)} L${nudge(91, seed, 5)} ${nudge(80, seed, 6)} L${nudge(32, seed, 7)} ${nudge(88, seed, 8)} Z`,
-    `M${nudge(37, seed, 9)} ${nudge(32, seed, 10)} L${nudge(61, seed, 11)} ${nudge(55, seed, 12)} L${nudge(84, seed, 13)} ${nudge(28, seed, 14)}`,
-    `M${nudge(33, seed, 15)} ${nudge(87, seed, 16)} L${nudge(61, seed, 17)} ${nudge(55, seed, 18)} L${nudge(91, seed, 19)} ${nudge(80, seed, 20)}`,
-  ],
-  (seed) => [
-    `M${nudge(60, seed, 1)} ${nudge(24, seed, 2)} L${nudge(68, seed, 3)} ${nudge(49, seed, 4)} L${nudge(94, seed, 5)} ${nudge(50, seed, 6)} L${nudge(73, seed, 7)} ${nudge(64, seed, 8)} L${nudge(80, seed, 9)} ${nudge(89, seed, 10)} L${nudge(60, seed, 11)} ${nudge(74, seed, 12)} L${nudge(39, seed, 13)} ${nudge(90, seed, 14)} L${nudge(47, seed, 15)} ${nudge(64, seed, 16)} L${nudge(26, seed, 17)} ${nudge(50, seed, 18)} L${nudge(52, seed, 19)} ${nudge(49, seed, 20)} Z`,
-    `M45 ${61 + bend(seed, 21)} C55 ${56 + bend(seed, 22)} 66 ${56 + bend(seed, 23)} 76 ${62 + bend(seed, 24)}`,
-  ],
-  (seed) => [
-    `M${nudge(29, seed, 1)} ${nudge(78, seed, 2)} C${nudge(38, seed, 3)} ${nudge(61, seed, 4)} ${nudge(49, seed, 5)} ${nudge(51, seed, 6)} ${nudge(62, seed, 7)} ${nudge(69, seed, 8)} C${nudge(72, seed, 9)} ${nudge(84, seed, 10)} ${nudge(89, seed, 11)} ${nudge(75, seed, 12)} ${nudge(94, seed, 13)} ${nudge(56, seed, 14)}`,
-    `M36 ${92 + bend(seed, 15)} C52 ${100 + bend(seed, 16)} 78 ${99 + bend(seed, 17)} 93 ${86 + bend(seed, 18)}`,
-    `M31 ${44 + bend(seed, 19)} C46 ${36 + bend(seed, 20)} 74 ${35 + bend(seed, 21)} 91 ${43 + bend(seed, 22)}`,
-  ],
-  (seed) => [
-    `M${nudge(34, seed, 1)} ${nudge(83, seed, 2)} C${nudge(42, seed, 3)} ${nudge(40, seed, 4)} ${nudge(72, seed, 5)} ${nudge(26, seed, 6)} ${nudge(89, seed, 7)} ${nudge(49, seed, 8)} C${nudge(105, seed, 9)} ${nudge(72, seed, 10)} ${nudge(72, seed, 11)} ${nudge(101, seed, 12)} ${nudge(43, seed, 13)} ${nudge(87, seed, 14)}`,
-    `M49 ${58 + bend(seed, 15)} C56 ${50 + bend(seed, 16)} 69 ${50 + bend(seed, 17)} 76 ${58 + bend(seed, 18)}`,
-    `M49 ${69 + bend(seed, 19)} C58 ${77 + bend(seed, 20)} 69 ${77 + bend(seed, 21)} 78 ${69 + bend(seed, 22)}`,
-  ],
-  (seed) => [
-    `M${nudge(42, seed, 1)} ${nudge(95, seed, 2)} C${nudge(36, seed, 3)} ${nudge(75, seed, 4)} ${nudge(37, seed, 5)} ${nudge(48, seed, 6)} ${nudge(57, seed, 7)} ${nudge(40, seed, 8)} C${nudge(78, seed, 9)} ${nudge(31, seed, 10)} ${nudge(93, seed, 11)} ${nudge(49, seed, 12)} ${nudge(85, seed, 13)} ${nudge(67, seed, 14)} C${nudge(77, seed, 15)} ${nudge(85, seed, 16)} ${nudge(51, seed, 17)} ${nudge(83, seed, 18)} ${nudge(51, seed, 19)} ${nudge(60, seed, 20)} C${nudge(51, seed, 21)} ${nudge(47, seed, 22)} ${nudge(66, seed, 23)} ${nudge(47, seed, 24)} ${nudge(70, seed, 25)} ${nudge(58, seed, 26)}`,
-    `M48 ${93 + bend(seed, 27)} C58 ${101 + bend(seed, 28)} 75 ${98 + bend(seed, 29)} 83 ${88 + bend(seed, 30)}`,
-  ],
-];
-
-const renderPaths = (art) => {
-  const seed = hashArt(art);
-  const paths = doodles[seed % doodles.length](seed);
-  return paths.map((d, index) => `<path d="${d}" fill="none" stroke-width="${index === 0 ? 7 : 5}" />`).join('');
-};
-
-export const renderChoiceIllustration = (art) => `<svg class="choice-doodle" data-art="${escapeAttribute(art)}" aria-hidden="true" viewBox="0 0 120 120" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg">${renderPaths(art)}</svg>`;

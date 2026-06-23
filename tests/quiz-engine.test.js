@@ -91,3 +91,16 @@ test('every question art key has a handwritten inline SVG doodle', () => {
   });
   assert.equal(new Set(artKeys.map(renderChoiceIllustration)).size, artKeys.length);
 });
+
+test('every question art key has an explicit semantic doodle scene', () => {
+  const artKeys = [...new Set(questions.flatMap(({ choices }) => choices.map(({ art }) => art)))];
+
+  artKeys.forEach((art) => {
+    assert.equal(illustrations[art].art, art);
+    assert.equal(typeof illustrations[art].name, 'string');
+    assert.ok(illustrations[art].name.length > 0);
+    assert.match(renderChoiceIllustration(art), new RegExp(`data-scene="${art}"`));
+  });
+
+  assert.equal(new Set(artKeys.map((art) => illustrations[art].name)).size, artKeys.length);
+});
