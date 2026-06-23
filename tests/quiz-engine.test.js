@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { applyAnswer, calculateScores, emptyScores, getType } from '../js/quiz-engine.js';
 import { profiles, questions } from '../js/quiz-data.js';
+import { createQuizSession } from '../js/quiz-session.js';
 
 const axes = ['EI', 'SN', 'TF', 'JP'];
 
@@ -63,4 +64,13 @@ test('the HTML provides every semantic screen and interaction target', async () 
 
   ids.forEach((id) => assert.match(html, new RegExp(`id=["']${id}["']`)));
   assert.match(html, /<html lang=["']th["']>/);
+});
+
+test('a quiz session replaces an earlier choice at the same question index', () => {
+  const session = createQuizSession();
+  session.choose(0, { axis: 'EI', value: 2 });
+  session.choose(1, { axis: 'SN', value: -1 });
+  session.choose(0, { axis: 'EI', value: -2 });
+
+  assert.deepEqual(session.answers(), [{ axis: 'EI', value: -2 }, { axis: 'SN', value: -1 }]);
 });

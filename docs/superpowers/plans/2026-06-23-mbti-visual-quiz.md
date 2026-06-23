@@ -63,7 +63,7 @@ test('applyAnswer returns a new score object without mutating the prior score', 
   assert.deepEqual(after, { EI: 2, SN: 0, TF: 0, JP: 0 });
 });
 
-test('calculateScores replaces a changed answer instead of double-counting it', () => {
+test('calculateScores sums the current selected answers', () => {
   const answers = [
     { axis: 'EI', value: 2 },
     { axis: 'EI', value: -2 },
