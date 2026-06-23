@@ -86,7 +86,7 @@ const renderQuestion = () => {
   byId('progress-bar').style.width = `${((currentIndex + 1) / questions.length) * 100}%`;
   byId('axis-label').textContent = axisLabels[question.axis];
   byId('question-text').textContent = question.text;
-  byId('back-button').disabled = currentIndex === 0;
+  byId('back-button').hidden = currentIndex === 0;
 
   const choicesEl = byId('choices');
   choicesEl.setAttribute('role', 'radiogroup');

@@ -110,6 +110,19 @@ test('the HTML provides every semantic screen and interaction target', async () 
   assert.match(html, /<html lang=["']th["']>/);
 });
 
+test('the back button has no text underline', async () => {
+  const css = await readFile(new URL('../style.css', import.meta.url), 'utf8');
+
+  assert.match(css, /#back-button\s*\{[^}]*text-decoration:\s*none;/s);
+});
+
+test('the back button is hidden only on the first question', async () => {
+  const app = await readFile(new URL('../js/app.js', import.meta.url), 'utf8');
+
+  assert.match(app, /byId\('back-button'\)\.hidden = currentIndex === 0;/);
+  assert.doesNotMatch(app, /byId\('back-button'\)\.disabled/);
+});
+
 test('share payload points back to the GitHub Pages app URL with a type deep link', async () => {
   const app = await readFile(new URL('../js/app.js', import.meta.url), 'utf8');
 

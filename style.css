@@ -95,6 +95,7 @@ h1 em { color: var(--coral); font-style: normal; text-shadow: 3px 3px 0 var(--in
 
 .secondary-button { padding: 12px 18px; border: 3px solid var(--ink); border-radius: 16px; background: var(--paper); box-shadow: 3px 3px 0 var(--ink); }
 .text-button { padding: 8px 2px; background: transparent; text-decoration: underline; text-decoration-thickness: 2px; }
+#back-button { text-decoration: none; }
 
 .sticker { position: absolute; display: grid; width: 74px; aspect-ratio: 1; place-items: center; border: 3px solid var(--ink); border-radius: 50% 46% 52% 44%; box-shadow: 4px 4px 0 var(--ink); font-size: 2.5rem; transform: rotate(-11deg); }
 .sticker-star { top: 11%; right: 12%; background: var(--yellow); }
