@@ -13,6 +13,26 @@ let currentType;
 let currentStats = [];
 let currentExtras;
 
+const axisLabels = {
+  EI: 'พลังสังคม',
+  SN: 'วิธีรับข้อมูล',
+  TF: 'วิธีตัดสินใจ',
+  JP: 'วิธีใช้ชีวิต',
+};
+
+const shuffle = (items) => {
+  const result = [...items];
+  for (let i = result.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [result[i], result[j]] = [result[j], result[i]];
+  }
+  return result;
+};
+
+// Shuffle once per question so choice order is stable across back/forward,
+// but no longer leaks the fixed strongest-to-weakest scoring order.
+const choiceOrders = questions.map((question) => shuffle(question.choices));
+
 const showScreen = (screenId) => {
   screens.forEach((id) => { byId(id).hidden = id !== screenId; });
 };
@@ -21,11 +41,11 @@ const renderQuestion = () => {
   const question = questions[currentIndex];
   byId('question-count').textContent = `ข้อ ${currentIndex + 1} / ${questions.length}`;
   byId('progress-bar').style.width = `${((currentIndex + 1) / questions.length) * 100}%`;
-  byId('axis-label').textContent = 'เลือกอันที่เป็นคุณที่สุด';
+  byId('axis-label').textContent = axisLabels[question.axis];
   byId('question-text').textContent = question.text;
   byId('back-button').disabled = currentIndex === 0;
 
-  const cards = question.choices.map((choice) => {
+  const cards = choiceOrders[currentIndex].map((choice) => {
     const card = document.createElement('button');
     const art = document.createElement('span');
     const label = document.createElement('span');
