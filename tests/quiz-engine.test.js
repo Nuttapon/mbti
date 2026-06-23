@@ -81,7 +81,7 @@ test('every question art key has a semantic SVG scene', () => {
   assert.deepEqual(Object.keys(illustrations).sort(), artKeys.sort());
   artKeys.forEach((art) => {
     const scene = renderChoiceIllustration(art);
-    assert.match(scene, /<svg[\s\S]*aria-hidden="true"/);
+    assert.match(scene, /choice-icon[\s\S]*aria-hidden="true"/);
     assert.doesNotMatch(scene, /<text[\s>]/);
   });
   assert.equal(new Set(artKeys.map(renderChoiceIllustration)).size, artKeys.length);
