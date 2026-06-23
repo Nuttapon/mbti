@@ -1,5 +1,5 @@
-import { profiles, questions } from './quiz-data.js';
-import { calculateScores, getType } from './quiz-engine.js';
+import { compatibility, profiles, questions } from './quiz-data.js';
+import { calculateScores, getAxisStats, getType } from './quiz-engine.js';
 import { createQuizSession } from './quiz-session.js';
 import { renderChoiceIllustration } from './choice-illustrations.js';
 
@@ -53,11 +53,62 @@ const selectAnswer = (question, choice) => {
   renderQuestion();
 };
 
+const radarPoint = (index, percent) => {
+  const angle = ((index * 90) - 90) * (Math.PI / 180);
+  const radius = 18 + (percent / 100) * 40;
+  return {
+    x: 60 + Math.cos(angle) * radius,
+    y: 60 + Math.sin(angle) * radius,
+  };
+};
+
+const renderRadar = (stats) => {
+  const points = stats.map(({ percent }, index) => radarPoint(index, percent));
+  const polygon = points.map(({ x, y }) => `${x.toFixed(1)},${y.toFixed(1)}`).join(' ');
+  const axes = stats.map(({ letter }, index) => {
+    const edge = radarPoint(index, 100);
+    return `<line x1="60" y1="60" x2="${edge.x.toFixed(1)}" y2="${edge.y.toFixed(1)}"></line><text x="${edge.x.toFixed(1)}" y="${edge.y.toFixed(1)}">${letter}</text>`;
+  }).join('');
+
+  return `<svg viewBox="0 0 120 120" role="img" aria-label="กราฟเรดาร์บุคลิก">
+    <polygon class="radar-web" points="60,20 100,60 60,100 20,60"></polygon>
+    <polygon class="radar-web radar-web-mid" points="60,36 84,60 60,84 36,60"></polygon>
+    ${axes}
+    <polygon class="radar-shape" points="${polygon}"></polygon>
+    ${points.map(({ x, y }) => `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="3.6"></circle>`).join('')}
+  </svg>`;
+};
+
+const renderStats = (stats) => {
+  const chips = stats.map(({ letter, label, percent }) => {
+    const chip = document.createElement('div');
+    chip.className = 'stat-chip';
+    chip.innerHTML = `<strong>${letter}</strong><span>${label}</span><meter min="0" max="100" value="${percent}"></meter><em>${percent}%</em>`;
+    return chip;
+  });
+  byId('result-stats').replaceChildren(...chips);
+};
+
+const renderMatches = (type) => {
+  const matches = compatibility[type].map(({ type: matchType, reason }, index) => {
+    const match = document.createElement('li');
+    const name = profiles[matchType].name.replace(` (${matchType})`, '');
+    match.innerHTML = `<strong>#${index + 1} ${matchType}</strong><span>${name}</span><p>${reason}</p>`;
+    return match;
+  });
+  byId('result-matches').replaceChildren(...matches);
+};
+
 const renderResult = () => {
-  const type = getType(calculateScores(session.answers()));
+  const scores = calculateScores(session.answers());
+  const type = getType(scores);
+  const stats = getAxisStats(scores);
   currentProfile = profiles[type];
   byId('result-title').textContent = currentProfile.name;
   byId('result-blurb').textContent = currentProfile.blurb;
+  byId('result-radar').innerHTML = renderRadar(stats);
+  renderStats(stats);
+  renderMatches(type);
   ['power', 'drain', 'party', 'warning'].forEach((key) => { byId(`result-${key}`).textContent = currentProfile[key]; });
   showScreen('result-screen');
 };

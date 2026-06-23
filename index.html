@@ -34,14 +34,23 @@
         <p class="eyebrow">ผลที่จักรวาลเลือกให้วันนี้</p>
         <article id="result-card" class="result-card">
           <div class="result-sticker" aria-hidden="true">✦</div>
+          <p class="result-kicker">TYPE REVEALED</p>
           <h2 id="result-title"></h2>
           <p id="result-blurb"></p>
+          <section class="result-radar-panel" aria-label="แผนภูมิพลังบุคลิก">
+            <div id="result-radar" class="result-radar"></div>
+            <div id="result-stats" class="result-stats"></div>
+          </section>
           <dl>
             <div><dt>สกิลเด่น</dt><dd id="result-power"></dd></div>
             <div><dt>พลังหมดเมื่อ</dt><dd id="result-drain"></dd></div>
             <div><dt>สกิลปาร์ตี้</dt><dd id="result-party"></dd></div>
             <div><dt>คำเตือน</dt><dd id="result-warning"></dd></div>
           </dl>
+          <section class="result-matches-section" aria-labelledby="result-matches-title">
+            <h3 id="result-matches-title">อยู่ด้วยแล้วเวิร์ก</h3>
+            <ol id="result-matches" class="result-matches"></ol>
+          </section>
         </article>
         <div class="result-actions">
           <button id="share-button" class="primary-button" type="button">แชร์การ์ดนี้ <span aria-hidden="true">↗</span></button>

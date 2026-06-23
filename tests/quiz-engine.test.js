@@ -1,8 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
-import { applyAnswer, calculateScores, emptyScores, getType } from '../js/quiz-engine.js';
-import { profiles, questions } from '../js/quiz-data.js';
+import { applyAnswer, calculateScores, emptyScores, getAxisStats, getType } from '../js/quiz-engine.js';
+import { compatibility, profiles, questions } from '../js/quiz-data.js';
 import { createQuizSession } from '../js/quiz-session.js';
 import { illustrations, renderChoiceIllustration } from '../js/choice-illustrations.js';
 
@@ -41,6 +41,18 @@ test('getType resolves all 16 MBTI codes and resolves ties to the first axis let
   assert.equal(getType(emptyScores()), 'ESTJ');
 });
 
+test('getAxisStats turns raw scores into display-ready radar traits', () => {
+  assert.deepEqual(
+    getAxisStats({ EI: 12, SN: -12, TF: 0, JP: -6 }).map(({ axis, letter, percent }) => ({ axis, letter, percent })),
+    [
+      { axis: 'EI', letter: 'E', percent: 100 },
+      { axis: 'SN', letter: 'N', percent: 100 },
+      { axis: 'TF', letter: 'T', percent: 50 },
+      { axis: 'JP', letter: 'P', percent: 75 },
+    ],
+  );
+});
+
 test('question data has 24 four-choice prompts split evenly across axes', () => {
   assert.equal(questions.length, 24);
   assert.deepEqual(
@@ -59,9 +71,24 @@ test('a Thai profile exists for every MBTI code', () => {
   ));
 });
 
+test('every MBTI type has three compatible match recommendations', () => {
+  const codes = Object.keys(profiles);
+
+  assert.deepEqual(Object.keys(compatibility).sort(), codes.sort());
+  Object.entries(compatibility).forEach(([type, matches]) => {
+    assert.equal(matches.length, 3);
+    assert.equal(new Set(matches.map(({ type: matchType }) => matchType)).size, 3);
+    matches.forEach(({ type: matchType, reason }) => {
+      assert.ok(codes.includes(matchType));
+      assert.notEqual(matchType, type);
+      assert.ok(reason.length > 0);
+    });
+  });
+});
+
 test('the HTML provides every semantic screen and interaction target', async () => {
   const html = await readFile(new URL('../index.html', import.meta.url), 'utf8');
-  const ids = ['intro-screen', 'quiz-screen', 'result-screen', 'start-button', 'back-button', 'choices', 'progress-bar', 'question-count', 'question-text', 'result-card', 'share-button', 'download-button', 'restart-button', 'share-canvas'];
+  const ids = ['intro-screen', 'quiz-screen', 'result-screen', 'start-button', 'back-button', 'choices', 'progress-bar', 'question-count', 'question-text', 'result-card', 'result-radar', 'result-stats', 'result-matches', 'share-button', 'download-button', 'restart-button', 'share-canvas'];
 
   ids.forEach((id) => assert.match(html, new RegExp(`id=["']${id}["']`)));
   assert.match(html, /<html lang=["']th["']>/);
