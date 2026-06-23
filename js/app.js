@@ -17,7 +17,7 @@ const renderQuestion = () => {
   const question = questions[currentIndex];
   byId('question-count').textContent = `ข้อ ${currentIndex + 1} / ${questions.length}`;
   byId('progress-bar').style.width = `${((currentIndex + 1) / questions.length) * 100}%`;
-  byId('axis-label').textContent = 'เลือกตามใจ ไม่ต้องคิดเยอะ';
+  byId('axis-label').textContent = 'เลือกอันที่เป็นคุณที่สุด';
   byId('question-text').textContent = question.text;
   byId('back-button').disabled = currentIndex === 0;
 
@@ -102,7 +102,7 @@ const createShareBlob = () => new Promise((resolve) => {
     context.fillStyle = '#243347'; context.font = '800 35px Tahoma'; context.fillText(label, 120, y);
     context.font = '600 42px Tahoma'; drawWrappedText(context, value, 120, y + 58, 760, 54);
   });
-  context.font = '700 36px Tahoma'; context.fillText('ผลลัพธ์เพื่อความบันเทิงเท่านั้น', 240, 1815);
+  context.font = '700 36px Tahoma'; context.fillText('ผลนี้เอาไว้เล่นสนุก ๆ นะ', 300, 1815);
   canvas.toBlob(resolve, 'image/png');
 });
 
