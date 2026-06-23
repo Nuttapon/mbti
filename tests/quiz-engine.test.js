@@ -4,6 +4,7 @@ import { readFile } from 'node:fs/promises';
 import { applyAnswer, calculateScores, emptyScores, getType } from '../js/quiz-engine.js';
 import { profiles, questions } from '../js/quiz-data.js';
 import { createQuizSession } from '../js/quiz-session.js';
+import { illustrations, renderChoiceIllustration } from '../js/choice-illustrations.js';
 
 const axes = ['EI', 'SN', 'TF', 'JP'];
 
@@ -73,4 +74,10 @@ test('a quiz session replaces an earlier choice at the same question index', () 
   session.choose(0, { axis: 'EI', value: -2 });
 
   assert.deepEqual(session.answers(), [{ axis: 'EI', value: -2 }, { axis: 'SN', value: -1 }]);
+});
+
+test('every question art key has a semantic SVG scene', () => {
+  const artKeys = [...new Set(questions.flatMap(({ choices }) => choices.map(({ art }) => art)))];
+  assert.deepEqual(Object.keys(illustrations).sort(), artKeys.sort());
+  artKeys.forEach((art) => assert.match(renderChoiceIllustration(art), /<svg[\s\S]*aria-hidden="true"/));
 });

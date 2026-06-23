@@ -1,6 +1,7 @@
 import { profiles, questions } from './quiz-data.js';
 import { calculateScores, getType } from './quiz-engine.js';
 import { createQuizSession } from './quiz-session.js';
+import { renderChoiceIllustration } from './choice-illustrations.js';
 
 const byId = (id) => document.getElementById(id);
 const session = createQuizSession();
@@ -30,6 +31,7 @@ const renderQuestion = () => {
     card.setAttribute('aria-label', choice.label);
     art.className = 'choice-art';
     art.setAttribute('aria-hidden', 'true');
+    art.innerHTML = renderChoiceIllustration(choice.art);
     label.textContent = choice.label;
     card.append(art, label);
     if (session.selectedAt(currentIndex)?.value === choice.value) card.classList.add('is-selected');
