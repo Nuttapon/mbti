@@ -113,11 +113,11 @@ h1 em { color: var(--coral); font-style: normal; text-shadow: 3px 3px 0 var(--in
 
 .choice-card {
   position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  min-height: 158px;
-  padding: 13px;
+  display: grid;
+  grid-template-rows: minmax(6rem, 1fr) minmax(3.5rem, auto);
+  place-items: center;
+  min-block-size: 11rem;
+  padding: .75rem .75rem .9rem;
   overflow: hidden;
   border: 3px solid var(--ink);
   border-radius: 24px;
@@ -126,10 +126,10 @@ h1 em { color: var(--coral); font-style: normal; text-shadow: 3px 3px 0 var(--in
   color: var(--ink);
   cursor: pointer;
   font: inherit;
-  font-size: .92rem;
+  font-size: clamp(1rem, 3.8vw, 1.15rem);
   font-weight: 850;
-  line-height: 1.3;
-  text-align: left;
+  line-height: 1.25;
+  text-align: center;
   transition: transform 140ms ease, box-shadow 140ms ease;
 }
 
@@ -139,12 +139,9 @@ h1 em { color: var(--coral); font-style: normal; text-shadow: 3px 3px 0 var(--in
 .choice-card:hover { transform: translate(-2px, -2px) rotate(-1deg); box-shadow: 7px 7px 0 var(--ink); }
 .choice-card.is-selected { transform: translate(4px, 4px); box-shadow: 1px 1px 0 var(--ink); }
 
-.choice-art { display: block; align-self: flex-start; width: 100%; height: 92px; margin: -4px 0 8px; }
-.choice-art svg { display: block; width: 100%; height: 100%; }
-.choice-card[data-art*="heart"] .choice-art, .choice-card[data-art*="hug"] .choice-art, .choice-card[data-art*="flower"] .choice-art { border-radius: 50% 50% 44% 44%; background: #ffd5df; }
-.choice-card[data-art*="moon"] .choice-art, .choice-card[data-art*="star"] .choice-art, .choice-card[data-art*="cosmos"] .choice-art, .choice-card[data-art*="rocket"] .choice-art { border-radius: 50%; background: #d8c7ff; }
-.choice-card[data-art*="cat"] .choice-art, .choice-card[data-art*="dog"] .choice-art, .choice-card[data-art*="dragon"] .choice-art { border-radius: 44% 44% 50% 50%; background: #ffe0a8; }
-.choice-card[data-art*="map"] .choice-art, .choice-card[data-art*="list"] .choice-art, .choice-card[data-art*="calendar"] .choice-art, .choice-card[data-art*="chart"] .choice-art { border-radius: 10px; background: #fff; }
+.choice-art { display: grid; inline-size: 100%; block-size: 100%; place-items: center; }
+.choice-art svg { display: block; inline-size: min(100%, 8.5rem); block-size: 100%; max-block-size: 6.6rem; }
+.choice-card > span:last-child { display: grid; inline-size: 100%; min-block-size: 2.5lh; place-items: center; text-wrap: balance; }
 
 .result-screen { display: flex; flex-direction: column; justify-content: center; }
 .result-card { position: relative; padding: 26px 21px 21px; border: 3px solid var(--ink); border-radius: 28px; background: var(--sea); box-shadow: 7px 7px 0 var(--ink); }
