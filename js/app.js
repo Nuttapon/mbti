@@ -1,4 +1,4 @@
-import { compatibility, profiles, questions } from './quiz-data.js';
+import { compatibility, profiles, questions, resultExtras } from './quiz-data.js';
 import { calculateScores, getAxisStats, getType } from './quiz-engine.js';
 import { createQuizSession } from './quiz-session.js';
 import { renderChoiceIllustration } from './choice-illustrations.js';
@@ -9,6 +9,9 @@ const screens = ['intro-screen', 'quiz-screen', 'result-screen'];
 const SHARE_URL = 'https://nuttapon.github.io/mbti/';
 let currentIndex = 0;
 let currentProfile;
+let currentType;
+let currentStats = [];
+let currentExtras;
 
 const showScreen = (screenId) => {
   screens.forEach((id) => { byId(id).hidden = id !== screenId; });
@@ -89,11 +92,21 @@ const renderStats = (stats) => {
   byId('result-stats').replaceChildren(...chips);
 };
 
+const renderPowerMeters = ({ meters }) => {
+  const cards = meters.map(({ label, value }) => {
+    const card = document.createElement('div');
+    card.className = 'power-meter';
+    card.innerHTML = `<span>${label}</span><strong>${value}%</strong><meter min="0" max="100" value="${value}"></meter>`;
+    return card;
+  });
+  byId('result-power-meters').replaceChildren(...cards);
+};
+
 const renderMatches = (type) => {
-  const matches = compatibility[type].map(({ type: matchType, reason }, index) => {
+  const matches = compatibility[type].map(({ type: matchType, role, reason }, index) => {
     const match = document.createElement('li');
     const name = profiles[matchType].name.replace(` (${matchType})`, '');
-    match.innerHTML = `<strong>#${index + 1} ${matchType}</strong><span>${name}</span><p>${reason}</p>`;
+    match.innerHTML = `<strong>#${index + 1} ${matchType}</strong><span>${role} · ${name}</span><p>${reason}</p>`;
     return match;
   });
   byId('result-matches').replaceChildren(...matches);
@@ -103,9 +116,14 @@ const renderResult = () => {
   const scores = calculateScores(session.answers());
   const type = getType(scores);
   const stats = getAxisStats(scores);
+  currentType = type;
+  currentStats = stats;
   currentProfile = profiles[type];
+  currentExtras = resultExtras[type];
   byId('result-title').textContent = currentProfile.name;
+  byId('result-hook').textContent = currentExtras.hook;
   byId('result-blurb').textContent = currentProfile.blurb;
+  renderPowerMeters(currentExtras);
   byId('result-radar').innerHTML = renderRadar(stats);
   renderStats(stats);
   renderMatches(type);
@@ -128,6 +146,60 @@ const drawWrappedText = (context, text, x, y, width, lineHeight) => {
   return cursorY;
 };
 
+const drawShareRadar = (context, stats, centerX, centerY, radius) => {
+  const radar = stats.map(({ percent }, index) => {
+    const angle = ((index * 90) - 90) * (Math.PI / 180);
+    const pointRadius = radius * (.45 + (percent / 100) * .55);
+    return {
+      x: centerX + Math.cos(angle) * pointRadius,
+      y: centerY + Math.sin(angle) * pointRadius,
+    };
+  });
+  const web = [
+    { x: centerX, y: centerY - radius },
+    { x: centerX + radius, y: centerY },
+    { x: centerX, y: centerY + radius },
+    { x: centerX - radius, y: centerY },
+  ];
+
+  context.save();
+  context.strokeStyle = '#243347';
+  context.lineWidth = 8;
+  context.lineJoin = 'round';
+  context.globalAlpha = .42;
+  context.beginPath();
+  web.forEach(({ x, y }, index) => { if (index === 0) context.moveTo(x, y); else context.lineTo(x, y); });
+  context.closePath();
+  context.stroke();
+  web.forEach(({ x, y }) => {
+    context.beginPath();
+    context.moveTo(centerX, centerY);
+    context.lineTo(x, y);
+    context.stroke();
+  });
+  context.globalAlpha = 1;
+  context.fillStyle = 'rgb(255 141 117 / 0.5)';
+  context.beginPath();
+  radar.forEach(({ x, y }, index) => { if (index === 0) context.moveTo(x, y); else context.lineTo(x, y); });
+  context.closePath();
+  context.fill();
+  context.stroke();
+  context.fillStyle = '#ff8d75';
+  radar.forEach(({ x, y }) => {
+    context.beginPath();
+    context.arc(x, y, 14, 0, Math.PI * 2);
+    context.fill();
+    context.stroke();
+  });
+  context.fillStyle = '#243347';
+  context.font = '900 38px Tahoma';
+  stats.forEach(({ letter }, index) => {
+    const { x, y } = web[index];
+    context.fillText(letter, x - 12, y + 13);
+  });
+  context.restore();
+};
+
 const createShareBlob = () => new Promise((resolve) => {
   const canvas = byId('share-canvas');
   const context = canvas.getContext('2d');
@@ -143,18 +215,43 @@ const createShareBlob = () => new Promise((resolve) => {
   context.font = '800 48px Tahoma';
   context.fillText('MBTI ไม่แม่น แต่แซวแม่น', 92, 130);
   context.fillStyle = '#ff8d75';
-  context.font = '900 86px Tahoma';
-  let bottom = drawWrappedText(context, currentProfile.name, 120, 470, 820, 106);
+  context.font = '900 78px Tahoma';
+  let bottom = drawWrappedText(context, currentProfile.name, 120, 410, 820, 94);
   context.fillStyle = '#243347';
-  context.font = '600 46px Tahoma';
-  bottom = drawWrappedText(context, currentProfile.blurb, 120, bottom + 106, 780, 68);
-  const rows = [['สกิลเด่น', currentProfile.power], ['พลังหมดเมื่อ', currentProfile.drain], ['สกิลปาร์ตี้', currentProfile.party], ['คำเตือน', currentProfile.warning]];
-  rows.forEach(([label, value], index) => {
-    const y = bottom + 120 + (index * 170);
-    context.fillStyle = '#243347'; context.font = '800 35px Tahoma'; context.fillText(label, 120, y);
-    context.font = '600 42px Tahoma'; drawWrappedText(context, value, 120, y + 58, 760, 54);
+  context.font = '700 42px Tahoma';
+  bottom = drawWrappedText(context, currentExtras.hook, 120, bottom + 76, 780, 58);
+  drawShareRadar(context, currentStats, 274, bottom + 245, 142);
+  currentExtras.meters.forEach(({ label, value }, index) => {
+    const y = bottom + 105 + (index * 92);
+    context.fillStyle = '#243347';
+    context.font = '800 34px Tahoma';
+    context.fillText(label, 500, y);
+    context.fillText(`${value}%`, 850, y);
+    context.strokeStyle = '#243347';
+    context.lineWidth = 8;
+    context.strokeRect(500, y + 24, 360, 22);
+    context.fillStyle = '#ff8d75';
+    context.fillRect(506, y + 30, (348 * value) / 100, 10);
   });
-  context.font = '700 36px Tahoma'; context.fillText('ผลนี้เอาไว้เล่นสนุก ๆ นะ', 300, 1815);
+  const matchY = bottom + 475;
+  context.fillStyle = '#243347';
+  context.font = '900 40px Tahoma';
+  context.fillText('คู่ที่อยู่ด้วยแล้วเวิร์ก', 120, matchY);
+  compatibility[currentType].forEach(({ type, role, reason }, index) => {
+    const y = matchY + 68 + (index * 128);
+    context.fillStyle = '#d9ff56';
+    context.fillRect(120, y - 42, 780, 98);
+    context.strokeStyle = '#243347';
+    context.lineWidth = 7;
+    context.strokeRect(120, y - 42, 780, 98);
+    context.fillStyle = '#243347';
+    context.font = '900 34px Tahoma';
+    context.fillText(`#${index + 1} ${type} ${role}`, 145, y);
+    context.font = '700 28px Tahoma';
+    drawWrappedText(context, reason, 145, y + 35, 710, 36);
+  });
+  context.font = '800 34px Tahoma';
+  context.fillText(SHARE_URL, 315, 1815);
   canvas.toBlob(resolve, 'image/png');
 });
 

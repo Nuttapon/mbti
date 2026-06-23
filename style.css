@@ -187,7 +187,47 @@ h1 em { color: var(--coral); font-style: normal; text-shadow: 3px 3px 0 var(--in
   letter-spacing: .08em;
 }
 .result-card h2 { max-width: 86%; margin: 0 0 10px; font-size: clamp(1.85rem, 7.8vw, 2.8rem); line-height: 1.05; }
-.result-card > p:not(.result-kicker) { margin: 0 0 18px; font-weight: 750; line-height: 1.55; }
+.result-hook {
+  position: relative;
+  margin: 0 0 12px;
+  padding: 10px 12px;
+  border: 2px solid var(--ink);
+  border-radius: 18px;
+  background: var(--yellow);
+  box-shadow: 3px 3px 0 var(--ink);
+  font-size: .98rem;
+  font-weight: 900;
+  line-height: 1.35;
+}
+.result-card > p:not(.result-kicker, .result-hook) { margin: 0 0 18px; font-weight: 750; line-height: 1.55; }
+.result-power-meters {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin: 0 0 14px;
+}
+.power-meter {
+  display: grid;
+  gap: 5px;
+  padding: 9px;
+  border: 2px solid var(--ink);
+  border-radius: 16px;
+  background: var(--paper);
+  box-shadow: 2px 2px 0 var(--ink);
+}
+.power-meter span { font-size: .72rem; font-weight: 900; line-height: 1.15; }
+.power-meter strong { font-size: 1.15rem; line-height: 1; }
+.power-meter meter {
+  width: 100%;
+  height: 10px;
+  overflow: hidden;
+  border: 2px solid var(--ink);
+  border-radius: 99px;
+  background: var(--paper);
+}
+.power-meter meter::-webkit-meter-bar { border: 0; background: transparent; }
+.power-meter meter::-webkit-meter-optimum-value { background: var(--lime); }
+.power-meter meter::-moz-meter-bar { background: var(--lime); }
 .result-radar-panel {
   display: grid;
   grid-template-columns: minmax(128px, .9fr) minmax(0, 1.1fr);
@@ -259,7 +299,7 @@ h1 em { color: var(--coral); font-style: normal; text-shadow: 3px 3px 0 var(--in
   box-shadow: 3px 3px 0 var(--ink);
 }
 .result-matches strong { font-size: .9rem; }
-.result-matches span { font-size: .82rem; font-weight: 900; }
+.result-matches span { font-size: .82rem; font-weight: 900; color: #77502a; }
 .result-matches p { grid-column: 1 / -1; margin: 0; font-size: .82rem; font-weight: 750; line-height: 1.35; }
 .result-actions { display: grid; gap: 13px; margin-top: 28px; }
 .result-actions .primary-button { width: 100%; }

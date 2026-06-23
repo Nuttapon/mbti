@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { applyAnswer, calculateScores, emptyScores, getAxisStats, getType } from '../js/quiz-engine.js';
-import { compatibility, profiles, questions } from '../js/quiz-data.js';
+import { compatibility, profiles, questions, resultExtras } from '../js/quiz-data.js';
 import { createQuizSession } from '../js/quiz-session.js';
 import { illustrations, renderChoiceIllustration } from '../js/choice-illustrations.js';
 
@@ -71,16 +71,32 @@ test('a Thai profile exists for every MBTI code', () => {
   ));
 });
 
-test('every MBTI type has three compatible match recommendations', () => {
+test('every MBTI type has a viral hook and three playful power meters', () => {
+  const codes = Object.keys(profiles);
+
+  assert.deepEqual(Object.keys(resultExtras).sort(), codes.sort());
+  Object.values(resultExtras).forEach(({ hook, meters }) => {
+    assert.ok(hook.length > 0);
+    assert.equal(meters.length, 3);
+    meters.forEach(({ label, value }) => {
+      assert.ok(label.length > 0);
+      assert.ok(Number.isInteger(value));
+      assert.ok(value >= 0 && value <= 100);
+    });
+  });
+});
+
+test('every MBTI type has three compatible match recommendations with roles', () => {
   const codes = Object.keys(profiles);
 
   assert.deepEqual(Object.keys(compatibility).sort(), codes.sort());
   Object.entries(compatibility).forEach(([type, matches]) => {
     assert.equal(matches.length, 3);
     assert.equal(new Set(matches.map(({ type: matchType }) => matchType)).size, 3);
-    matches.forEach(({ type: matchType, reason }) => {
+    matches.forEach(({ type: matchType, role, reason }) => {
       assert.ok(codes.includes(matchType));
       assert.notEqual(matchType, type);
+      assert.ok(role.length > 0);
       assert.ok(reason.length > 0);
     });
   });
@@ -88,7 +104,7 @@ test('every MBTI type has three compatible match recommendations', () => {
 
 test('the HTML provides every semantic screen and interaction target', async () => {
   const html = await readFile(new URL('../index.html', import.meta.url), 'utf8');
-  const ids = ['intro-screen', 'quiz-screen', 'result-screen', 'start-button', 'back-button', 'choices', 'progress-bar', 'question-count', 'question-text', 'result-card', 'result-radar', 'result-stats', 'result-matches', 'share-button', 'download-button', 'restart-button', 'share-canvas'];
+  const ids = ['intro-screen', 'quiz-screen', 'result-screen', 'start-button', 'back-button', 'choices', 'progress-bar', 'question-count', 'question-text', 'result-card', 'result-hook', 'result-radar', 'result-stats', 'result-power-meters', 'result-matches', 'share-button', 'download-button', 'restart-button', 'share-canvas'];
 
   ids.forEach((id) => assert.match(html, new RegExp(`id=["']${id}["']`)));
   assert.match(html, /<html lang=["']th["']>/);
@@ -99,6 +115,15 @@ test('share payload points back to the GitHub Pages app URL', async () => {
 
   assert.match(app, /https:\/\/nuttapon\.github\.io\/mbti\//);
   assert.match(app, /url:\s*SHARE_URL/);
+});
+
+test('share image includes the upgraded result hook, radar, matches, and link', async () => {
+  const app = await readFile(new URL('../js/app.js', import.meta.url), 'utf8');
+
+  assert.match(app, /drawShareRadar/);
+  assert.match(app, /currentExtras\.hook/);
+  assert.match(app, /คู่ที่อยู่ด้วยแล้วเวิร์ก/);
+  assert.match(app, /SHARE_URL/);
 });
 
 test('a quiz session replaces an earlier choice at the same question index', () => {
