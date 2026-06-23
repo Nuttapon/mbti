@@ -67,6 +67,13 @@ test('the HTML provides every semantic screen and interaction target', async () 
   assert.match(html, /<html lang=["']th["']>/);
 });
 
+test('share payload points back to the GitHub Pages app URL', async () => {
+  const app = await readFile(new URL('../js/app.js', import.meta.url), 'utf8');
+
+  assert.match(app, /https:\/\/nuttapon\.github\.io\/mbti\//);
+  assert.match(app, /url:\s*SHARE_URL/);
+});
+
 test('a quiz session replaces an earlier choice at the same question index', () => {
   const session = createQuizSession();
   session.choose(0, { axis: 'EI', value: 2 });

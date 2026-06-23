@@ -6,6 +6,7 @@ import { renderChoiceIllustration } from './choice-illustrations.js';
 const byId = (id) => document.getElementById(id);
 const session = createQuizSession();
 const screens = ['intro-screen', 'quiz-screen', 'result-screen'];
+const SHARE_URL = 'https://nuttapon.github.io/mbti/';
 let currentIndex = 0;
 let currentProfile;
 
@@ -119,9 +120,16 @@ const shareResult = async () => {
   const blob = await createShareBlob();
   if (!blob) return;
   const file = new File([blob], 'mbti-result.png', { type: 'image/png' });
-  const shareData = { title: currentProfile.name, text: currentProfile.blurb, files: [file] };
-  if (navigator.share && (!navigator.canShare || navigator.canShare(shareData))) {
-    try { await navigator.share(shareData); return; } catch (error) { if (error.name !== 'AbortError') downloadBlob(blob); return; }
+  const shareData = { title: currentProfile.name, text: currentProfile.blurb, url: SHARE_URL, files: [file] };
+  const linkShareData = { title: currentProfile.name, text: currentProfile.blurb, url: SHARE_URL };
+  if (navigator.share) {
+    const canShareFile = !navigator.canShare || navigator.canShare(shareData);
+    if (canShareFile) {
+      try { await navigator.share(shareData); return; } catch (error) { if (error.name === 'AbortError') return; }
+    }
+    if (!navigator.canShare || navigator.canShare(linkShareData)) {
+      try { await navigator.share(linkShareData); return; } catch (error) { if (error.name === 'AbortError') return; }
+    }
   }
   downloadBlob(blob);
 };
