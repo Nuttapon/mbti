@@ -5,6 +5,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#fff7e6" />
     <title>MBTI ไม่แม่น แต่แซวแม่น</title>
+    <meta name="description" content="แบบทดสอบ MBTI สายฮา 24 ข้อ เลือกภาพที่เป็นคุณที่สุด แล้วรับการ์ดบุคลิก 1 ใน 16 ไทป์ พร้อมคู่ที่อยู่ด้วยแล้วเวิร์ก" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="MBTI ไม่แม่น แต่แซวแม่น" />
+    <meta property="og:title" content="MBTI ไม่แม่น แต่แซวแม่น" />
+    <meta property="og:description" content="เลือกภาพที่เป็นคุณที่สุด 24 ข้อ แล้วดูว่าจักรวาลจัดให้เป็นไทป์ไหน 🔮" />
+    <meta property="og:url" content="https://nuttapon.github.io/mbti/" />
+    <meta property="og:image" content="https://nuttapon.github.io/mbti/assets/og-image.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:locale" content="th_TH" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="MBTI ไม่แม่น แต่แซวแม่น" />
+    <meta name="twitter:description" content="เลือกภาพที่เป็นคุณที่สุด 24 ข้อ แล้วดูว่าจักรวาลจัดให้เป็นไทป์ไหน 🔮" />
+    <meta name="twitter:image" content="https://nuttapon.github.io/mbti/assets/og-image.png" />
+
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
@@ -35,8 +52,9 @@
         <article id="result-card" class="result-card">
           <div class="result-sticker" aria-hidden="true">✦</div>
           <p class="result-kicker">ไทป์ของคุณคือ</p>
-          <h2 id="result-title"></h2>
+          <h2 id="result-title" tabindex="-1"></h2>
           <p id="result-hook" class="result-hook"></p>
+          <p id="result-rarity" class="result-rarity"></p>
           <p id="result-blurb"></p>
           <div id="result-power-meters" class="result-power-meters" aria-label="ค่าพลังเฉพาะไทป์"></div>
           <section class="result-radar-panel" aria-label="แผนภูมิพลังบุคลิก">

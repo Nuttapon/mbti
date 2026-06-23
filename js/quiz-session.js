@@ -14,5 +14,15 @@ export const createQuizSession = () => {
     selectedAt(index) {
       return selectedAnswers.get(index);
     },
+    entries() {
+      return [...selectedAnswers.entries()];
+    },
+    restore(entries) {
+      selectedAnswers.clear();
+      entries.forEach(([index, answer]) => selectedAnswers.set(Number(index), answer));
+    },
+    size() {
+      return selectedAnswers.size;
+    },
   };
 };

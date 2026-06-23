@@ -76,6 +76,22 @@ export const resultExtras = {
   INFP: { hook: 'คุณเก็บความหมายดี ๆ ไว้ในมุมที่คนอื่นเดินผ่านไปเฉย ๆ', meters: [{ label: 'พลังจินตนาการ', value: 96 }, { label: 'แพ้คำพูดแข็ง', value: 88 }, { label: 'หัวใจนักกวี', value: 93 }] },
 };
 
+// Sampled-from-the-wild distribution (อิงสัดส่วนประชากร MBTI โดยประมาณ).
+// ใช้ทำป้าย "ไทป์นี้หายากแค่ไหน" บนหน้าผล.
+export const rarity = {
+  ISFJ: 13.8, ESFJ: 12.3, ISTJ: 11.6, ISFP: 8.8,
+  ESTJ: 8.7, ESFP: 8.5, ENFP: 8.1, ISTP: 5.4,
+  INFP: 4.4, ESTP: 4.3, INTP: 3.3, ENTP: 3.2,
+  ENFJ: 2.5, INTJ: 2.1, ENTJ: 1.8, INFJ: 1.5,
+};
+
+export const rarityTier = (percent) => {
+  if (percent < 2.5) return { label: 'หายากระดับตำนาน', icon: '🦄' };
+  if (percent < 5) return { label: 'หายากมาก', icon: '✨' };
+  if (percent < 9) return { label: 'พบไม่บ่อย', icon: '🍀' };
+  return { label: 'พบเจอได้ทั่วไป', icon: '🌏' };
+};
+
 export const compatibility = {
   ESTJ: [
     { type: 'ISFJ', reason: 'ช่วยจำรายละเอียดมนุษย์ให้แผนของคุณนุ่มขึ้น' },

@@ -1,12 +1,15 @@
-import { compatibility, profiles, questions, resultExtras } from './quiz-data.js';
+import { compatibility, profiles, questions, rarity, rarityTier, resultExtras } from './quiz-data.js';
 import { calculateScores, getAxisStats, getType } from './quiz-engine.js';
 import { createQuizSession } from './quiz-session.js';
 import { renderChoiceIllustration } from './choice-illustrations.js';
+import { burstConfetti } from './confetti.js';
 
 const byId = (id) => document.getElementById(id);
 const session = createQuizSession();
 const screens = ['intro-screen', 'quiz-screen', 'result-screen'];
 const SHARE_URL = 'https://nuttapon.github.io/mbti/';
+const STORAGE_KEY = 'mbti-progress';
+const VALID_TYPES = new Set(Object.keys(profiles));
 let currentIndex = 0;
 let currentProfile;
 let currentType;
@@ -33,8 +36,48 @@ const shuffle = (items) => {
 // but no longer leaks the fixed strongest-to-weakest scoring order.
 const choiceOrders = questions.map((question) => shuffle(question.choices));
 
+const saveProgress = () => {
+  try {
+    if (!session.size()) { localStorage.removeItem(STORAGE_KEY); return; }
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ index: currentIndex, entries: session.entries() }));
+  } catch { /* storage blocked (private mode) — degrade silently */ }
+};
+
+const clearProgress = () => {
+  session.clear();
+  try { localStorage.removeItem(STORAGE_KEY); } catch { /* ignore */ }
+};
+
+const loadProgress = () => {
+  try {
+    const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null');
+    if (!saved?.entries?.length) return null;
+    session.restore(saved.entries);
+    return Math.min(Math.max(saved.index ?? 0, 0), questions.length - 1);
+  } catch { return null; }
+};
+
+// Synthesize plausible signed scores from a 4-letter type so a shared
+// ?type=XXXX link can render a result card without the original answers.
+const scoresFromType = (type) => {
+  const positive = { E: 'EI', S: 'SN', T: 'TF', J: 'JP' };
+  const negative = { I: 'EI', N: 'SN', F: 'TF', P: 'JP' };
+  const scores = { EI: 0, SN: 0, TF: 0, JP: 0 };
+  [...type].forEach((letter) => {
+    const magnitude = 6 + (letter.charCodeAt(0) % 6); // 6–11, deterministic per letter
+    if (positive[letter]) scores[positive[letter]] = magnitude;
+    else if (negative[letter]) scores[negative[letter]] = -magnitude;
+  });
+  return scores;
+};
+
 const showScreen = (screenId) => {
   screens.forEach((id) => { byId(id).hidden = id !== screenId; });
+};
+
+const focusChoiceByOffset = (cards, current, offset) => {
+  const next = (current + offset + cards.length) % cards.length;
+  cards[next].focus();
 };
 
 const renderQuestion = () => {
@@ -45,36 +88,73 @@ const renderQuestion = () => {
   byId('question-text').textContent = question.text;
   byId('back-button').disabled = currentIndex === 0;
 
-  const cards = choiceOrders[currentIndex].map((choice) => {
+  const choicesEl = byId('choices');
+  choicesEl.setAttribute('role', 'radiogroup');
+  choicesEl.setAttribute('aria-label', question.text);
+
+  const selected = session.selectedAt(currentIndex);
+  const cards = choiceOrders[currentIndex].map((choice, position) => {
     const card = document.createElement('button');
     const art = document.createElement('span');
     const label = document.createElement('span');
     card.type = 'button';
     card.className = 'choice-card';
     card.dataset.art = choice.art;
-    card.setAttribute('aria-label', choice.label);
+    card.setAttribute('role', 'radio');
+    const isSelected = selected?.value === choice.value;
+    card.setAttribute('aria-checked', String(isSelected));
+    card.setAttribute('aria-label', `ตัวเลือกที่ ${position + 1}: ${choice.label}`);
     art.className = 'choice-art';
     art.setAttribute('aria-hidden', 'true');
     art.innerHTML = renderChoiceIllustration(choice.art);
     label.textContent = choice.label;
     card.append(art, label);
-    if (session.selectedAt(currentIndex)?.value === choice.value) card.classList.add('is-selected');
+    if (isSelected) card.classList.add('is-selected');
     card.addEventListener('click', () => selectAnswer(question, choice));
     return card;
   });
 
-  byId('choices').replaceChildren(...cards);
+  cards.forEach((card, position) => {
+    card.addEventListener('keydown', (event) => {
+      if (event.key === 'ArrowRight' || event.key === 'ArrowDown') {
+        event.preventDefault();
+        focusChoiceByOffset(cards, position, 1);
+      } else if (event.key === 'ArrowLeft' || event.key === 'ArrowUp') {
+        event.preventDefault();
+        focusChoiceByOffset(cards, position, -1);
+      }
+    });
+  });
+
+  choicesEl.replaceChildren(...cards);
+
+  // Re-trigger the enter animation on every question change.
+  byId('quiz-screen').classList.remove('is-entering');
+  void byId('quiz-screen').offsetWidth;
+  byId('quiz-screen').classList.add('is-entering');
+
+  (cards.find((card) => card.classList.contains('is-selected')) || cards[0])?.focus();
 };
 
 const selectAnswer = (question, choice) => {
   session.choose(currentIndex, { axis: question.axis, value: choice.value });
   if (currentIndex === questions.length - 1) {
-    renderResult();
+    finishQuiz();
     return;
   }
   currentIndex += 1;
+  saveProgress();
   renderQuestion();
 };
+
+// Number keys 1–4 pick a choice on the active quiz screen.
+document.addEventListener('keydown', (event) => {
+  if (byId('quiz-screen').hidden) return;
+  const slot = Number(event.key);
+  if (!Number.isInteger(slot) || slot < 1 || slot > 4) return;
+  const card = byId('choices').children[slot - 1];
+  if (card) { event.preventDefault(); card.click(); }
+});
 
 const radarPoint = (index, percent) => {
   const angle = ((index * 90) - 90) * (Math.PI / 180);
@@ -132,8 +212,13 @@ const renderMatches = (type) => {
   byId('result-matches').replaceChildren(...matches);
 };
 
-const renderResult = () => {
-  const scores = calculateScores(session.answers());
+const renderRarity = (type) => {
+  const percent = rarity[type];
+  const { label, icon } = rarityTier(percent);
+  byId('result-rarity').textContent = `${icon} ${label} · มีแค่ราว ${percent}% ของคนทั้งโลก`;
+};
+
+const renderResult = (scores, { celebrate = true } = {}) => {
   const type = getType(scores);
   const stats = getAxisStats(scores);
   currentType = type;
@@ -142,13 +227,24 @@ const renderResult = () => {
   currentExtras = resultExtras[type];
   byId('result-title').textContent = currentProfile.name;
   byId('result-hook').textContent = currentExtras.hook;
+  renderRarity(type);
   byId('result-blurb').textContent = currentProfile.blurb;
   renderPowerMeters(currentExtras);
   byId('result-radar').innerHTML = renderRadar(stats);
   renderStats(stats);
   renderMatches(type);
   ['power', 'drain', 'party', 'warning'].forEach((key) => { byId(`result-${key}`).textContent = currentProfile[key]; });
+  document.title = `${currentProfile.name} · MBTI ไม่แม่น แต่แซวแม่น`;
   showScreen('result-screen');
+  if (celebrate) {
+    byId('result-title').focus?.();
+    burstConfetti();
+  }
+};
+
+const finishQuiz = () => {
+  renderResult(calculateScores(session.answers()), { celebrate: true });
+  clearProgress();
 };
 
 const drawWrappedText = (context, text, x, y, width, lineHeight) => {
@@ -284,26 +380,92 @@ const downloadBlob = (blob) => {
   URL.revokeObjectURL(url);
 };
 
-const shareResult = async () => {
-  const blob = await createShareBlob();
-  if (!blob) return;
-  const file = new File([blob], 'mbti-result.png', { type: 'image/png' });
-  const shareData = { title: currentProfile.name, text: currentProfile.blurb, url: SHARE_URL, files: [file] };
-  const linkShareData = { title: currentProfile.name, text: currentProfile.blurb, url: SHARE_URL };
-  if (navigator.share) {
-    const canShareFile = !navigator.canShare || navigator.canShare(shareData);
-    if (canShareFile) {
-      try { await navigator.share(shareData); return; } catch (error) { if (error.name === 'AbortError') return; }
-    }
-    if (!navigator.canShare || navigator.canShare(linkShareData)) {
-      try { await navigator.share(linkShareData); return; } catch (error) { if (error.name === 'AbortError') return; }
-    }
+const shareUrlForType = () => `${SHARE_URL}?type=${currentType}`;
+
+// Image-file sharing only behaves on mobile native share sheets. On desktop,
+// Chrome dumps the PNG into a temp WebShare/ dir and the target concatenates
+// the local file path onto the URL — so desktop shares the link only.
+const isLikelyMobile = () =>
+  navigator.maxTouchPoints > 1 && /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+
+const showToast = (message) => {
+  let toast = byId('toast');
+  if (!toast) {
+    toast = document.createElement('div');
+    toast.id = 'toast';
+    toast.className = 'toast';
+    toast.setAttribute('role', 'status');
+    document.body.append(toast);
   }
-  downloadBlob(blob);
+  toast.textContent = message;
+  toast.classList.add('is-visible');
+  clearTimeout(showToast.timer);
+  showToast.timer = setTimeout(() => toast.classList.remove('is-visible'), 2400);
 };
 
-byId('start-button').addEventListener('click', () => { currentIndex = 0; session.clear(); showScreen('quiz-screen'); renderQuestion(); });
+const copyLink = async (url) => {
+  try {
+    await navigator.clipboard.writeText(url);
+    showToast('คัดลอกลิงก์แล้ว วางแชร์ได้เลย 🔗');
+  } catch {
+    showToast('คัดลอกลิงก์ไม่ได้ ลองกดบันทึกรูปแทนนะ');
+  }
+};
+
+const shareResult = async () => {
+  const url = shareUrlForType();
+  const linkShareData = { title: currentProfile.name, text: currentProfile.blurb, url };
+
+  // Mobile: share the rendered card image through the native sheet.
+  if (isLikelyMobile() && navigator.share) {
+    const blob = await createShareBlob();
+    if (blob) {
+      const file = new File([blob], 'mbti-result.png', { type: 'image/png' });
+      const fileShareData = { ...linkShareData, files: [file] };
+      if (!navigator.canShare || navigator.canShare(fileShareData)) {
+        try { await navigator.share(fileShareData); return; } catch (error) { if (error.name === 'AbortError') return; }
+      }
+    }
+  }
+
+  // Desktop (or no file support): share the deep link only — it unfurls via OG image.
+  if (navigator.share && (!navigator.canShare || navigator.canShare(linkShareData))) {
+    try { await navigator.share(linkShareData); return; } catch (error) { if (error.name === 'AbortError') return; }
+  }
+
+  // Last resort: copy the link to the clipboard.
+  await copyLink(url);
+};
+
+const resetUrlAndTitle = () => {
+  document.title = 'MBTI ไม่แม่น แต่แซวแม่น';
+  if (location.search) history.replaceState(null, '', location.pathname);
+};
+
+const startFresh = () => { currentIndex = 0; clearProgress(); resetUrlAndTitle(); showScreen('quiz-screen'); renderQuestion(); };
+
+byId('start-button').addEventListener('click', startFresh);
 byId('back-button').addEventListener('click', () => { if (currentIndex > 0) { currentIndex -= 1; renderQuestion(); } });
-byId('restart-button').addEventListener('click', () => { currentIndex = 0; session.clear(); showScreen('intro-screen'); });
+byId('restart-button').addEventListener('click', () => { currentIndex = 0; clearProgress(); resetUrlAndTitle(); showScreen('intro-screen'); });
 byId('share-button').addEventListener('click', shareResult);
 byId('download-button').addEventListener('click', async () => { const blob = await createShareBlob(); if (blob) downloadBlob(blob); });
+
+const init = () => {
+  // 1) Shared deep link (?type=INFP) renders the result card straight away.
+  const sharedType = new URLSearchParams(location.search).get('type')?.toUpperCase();
+  if (sharedType && VALID_TYPES.has(sharedType)) {
+    renderResult(scoresFromType(sharedType), { celebrate: false });
+    return;
+  }
+  // 2) Saved progress resumes the quiz where it was left off.
+  const resumeIndex = loadProgress();
+  if (resumeIndex !== null) {
+    currentIndex = resumeIndex;
+    showScreen('quiz-screen');
+    renderQuestion();
+    return;
+  }
+  // 3) Otherwise start at the intro screen (default markup state).
+};
+
+init();

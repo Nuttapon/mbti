@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="th">
+  <head>
+    <meta charset="UTF-8" />
+    <style>
+      * { box-sizing: border-box; margin: 0; }
+      html, body { width: 1200px; height: 630px; }
+      body {
+        display: flex;
+        position: relative;
+        flex-direction: column;
+        justify-content: center;
+        overflow: hidden;
+        padding: 70px 80px;
+        background:
+          radial-gradient(circle at 12% 14%, rgba(255, 214, 90, 0.7) 0 5px, transparent 6px),
+          radial-gradient(circle at 88% 80%, rgba(141, 229, 244, 0.7) 0 6px, transparent 7px),
+          #fff7e6;
+        color: #243347;
+        font-family: "Leelawadee UI", "Sukhumvit Set", "Noto Sans Thai", Tahoma, sans-serif;
+      }
+      .blob { position: absolute; border: 5px solid #243347; }
+      .blob-sea { top: -120px; right: -60px; width: 360px; height: 360px; border-radius: 50%; background: #8de5f4; }
+      .blob-yellow { bottom: -150px; left: -70px; width: 420px; height: 420px; border-radius: 50%; background: #ffd65a; }
+      .frame {
+        position: relative;
+        z-index: 2;
+        padding: 54px 60px;
+        border: 7px solid #243347;
+        border-radius: 36px;
+        background: rgba(255, 253, 247, 0.86);
+        box-shadow: 12px 12px 0 #243347;
+      }
+      .eyebrow {
+        display: inline-block;
+        margin-bottom: 22px;
+        padding: 8px 16px;
+        border: 3px solid #243347;
+        border-radius: 99px;
+        background: #d9ff56;
+        font-size: 26px;
+        font-weight: 900;
+        letter-spacing: 0.04em;
+      }
+      h1 {
+        font-family: "Chakra Petch", "Leelawadee UI", sans-serif;
+        font-size: 104px;
+        font-weight: 900;
+        line-height: 0.96;
+        letter-spacing: -0.04em;
+      }
+      h1 em { color: #ff8d75; font-style: normal; text-shadow: 5px 5px 0 #243347; }
+      p.tag { margin-top: 26px; font-size: 36px; font-weight: 750; line-height: 1.4; }
+      .url {
+        display: inline-block;
+        margin-top: 30px;
+        color: #77502a;
+        font-size: 27px;
+        font-weight: 900;
+        letter-spacing: 0.02em;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="blob blob-sea"></div>
+    <div class="blob blob-yellow"></div>
+    <div class="frame">
+      <span class="eyebrow">24 คำถาม · 16 สายบุคลิก</span>
+      <h1>MBTI ไม่แม่น<br /><em>แต่แซวแม่น</em></h1>
+      <p class="tag">เลือกภาพที่เป็นคุณที่สุด แล้วดูว่าจักรวาลจัดให้เป็นไทป์ไหน 🔮</p>
+      <span class="url">nuttapon.github.io/mbti</span>
+    </div>
+  </body>
+</html>

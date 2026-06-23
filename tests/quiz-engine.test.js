@@ -110,11 +110,12 @@ test('the HTML provides every semantic screen and interaction target', async () 
   assert.match(html, /<html lang=["']th["']>/);
 });
 
-test('share payload points back to the GitHub Pages app URL', async () => {
+test('share payload points back to the GitHub Pages app URL with a type deep link', async () => {
   const app = await readFile(new URL('../js/app.js', import.meta.url), 'utf8');
 
   assert.match(app, /https:\/\/nuttapon\.github\.io\/mbti\//);
-  assert.match(app, /url:\s*SHARE_URL/);
+  assert.match(app, /\$\{SHARE_URL\}\?type=\$\{currentType\}/);
+  assert.match(app, /url:\s*shareUrlForType\(\)|const url = shareUrlForType\(\)/);
 });
 
 test('share image includes the upgraded result hook, radar, matches, and link', async () => {

@@ -109,6 +109,18 @@ h1 em { color: var(--coral); font-style: normal; text-shadow: 3px 3px 0 var(--in
 .progress-track span { display: block; width: 0; height: 100%; border-radius: inherit; background: var(--coral); transition: width 220ms ease; }
 #question-text { margin: 0 0 24px; font-size: clamp(1.65rem, 7vw, 2.45rem); line-height: 1.18; }
 
+@keyframes question-enter {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.is-entering #question-text { animation: question-enter 300ms ease both; }
+.is-entering #axis-label { animation: question-enter 260ms ease both; }
+.is-entering .choice-card { animation: question-enter 380ms ease both; }
+.is-entering .choice-card:nth-child(1) { animation-delay: 40ms; }
+.is-entering .choice-card:nth-child(2) { animation-delay: 90ms; }
+.is-entering .choice-card:nth-child(3) { animation-delay: 140ms; }
+.is-entering .choice-card:nth-child(4) { animation-delay: 190ms; }
+
 .choices-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
 
 .choice-card {
@@ -199,7 +211,21 @@ h1 em { color: var(--coral); font-style: normal; text-shadow: 3px 3px 0 var(--in
   font-weight: 900;
   line-height: 1.35;
 }
-.result-card > p:not(.result-kicker, .result-hook) { margin: 0 0 18px; font-weight: 750; line-height: 1.55; }
+.result-card > p:not(.result-kicker, .result-hook, .result-rarity) { margin: 0 0 18px; font-weight: 750; line-height: 1.55; }
+.result-rarity {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0 0 16px;
+  padding: 6px 12px;
+  border: 2px solid var(--ink);
+  border-radius: 99px;
+  background: var(--paper);
+  box-shadow: 2px 2px 0 var(--ink);
+  font-size: .8rem;
+  font-weight: 900;
+  line-height: 1.2;
+}
 .result-power-meters {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -305,6 +331,25 @@ h1 em { color: var(--coral); font-style: normal; text-shadow: 3px 3px 0 var(--in
 .result-actions .primary-button { width: 100%; }
 
 #share-canvas { position: fixed; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+
+.toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  z-index: 60;
+  max-width: calc(100% - 32px);
+  padding: 12px 18px;
+  border: 3px solid var(--ink);
+  border-radius: 16px;
+  background: var(--lime);
+  box-shadow: var(--shadow);
+  font-weight: 850;
+  opacity: 0;
+  transform: translate(-50%, 16px);
+  transition: opacity 180ms ease, transform 180ms ease;
+  pointer-events: none;
+}
+.toast.is-visible { opacity: 1; transform: translate(-50%, 0); }
 
 @media (min-width: 700px) {
   .screen { padding: 48px 46px 60px; }
