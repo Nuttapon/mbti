@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { readFile } from 'node:fs/promises';
 import { applyAnswer, calculateScores, emptyScores, getType } from '../js/quiz-engine.js';
 import { profiles, questions } from '../js/quiz-data.js';
 
@@ -54,4 +55,12 @@ test('a Thai profile exists for every MBTI code', () => {
   assert.ok(Object.values(profiles).every(({ name, blurb, power, drain, party, warning }) =>
     [name, blurb, power, drain, party, warning].every((value) => value.length > 0),
   ));
+});
+
+test('the HTML provides every semantic screen and interaction target', async () => {
+  const html = await readFile(new URL('../index.html', import.meta.url), 'utf8');
+  const ids = ['intro-screen', 'quiz-screen', 'result-screen', 'start-button', 'back-button', 'choices', 'progress-bar', 'question-count', 'question-text', 'result-card', 'share-button', 'download-button', 'restart-button', 'share-canvas'];
+
+  ids.forEach((id) => assert.match(html, new RegExp(`id=["']${id}["']`)));
+  assert.match(html, /<html lang=["']th["']>/);
 });

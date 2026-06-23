@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="th">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#fff7e6" />
+    <title>MBTI ไม่แม่น แต่แซวแม่น</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <section id="intro-screen" class="screen intro-screen" aria-labelledby="intro-title">
+        <div class="sticker sticker-star" aria-hidden="true">✦</div>
+        <div class="sticker sticker-heart" aria-hidden="true">♥</div>
+        <p class="eyebrow">24 คำถาม · 16 คาแรกเตอร์</p>
+        <h1 id="intro-title">MBTI ไม่แม่น<br /><em>แต่แซวแม่น</em></h1>
+        <p class="intro-copy">เลือกภาพที่ใกล้คุณที่สุด ไม่มีข้อถูกผิด และไม่มีใครเอาคำตอบไปเก็บ</p>
+        <div class="intro-doodles" aria-hidden="true"><span>☀</span><span>☁</span><span>✿</span><span>☂</span></div>
+        <button id="start-button" class="primary-button" type="button">เริ่มแซวตัวเอง <span aria-hidden="true">→</span></button>
+      </section>
+
+      <section id="quiz-screen" class="screen" aria-live="polite" hidden>
+        <header class="quiz-header">
+          <button id="back-button" class="text-button" type="button">← ย้อนกลับ</button>
+          <span id="question-count"></span>
+        </header>
+        <div class="progress-track" aria-hidden="true"><span id="progress-bar"></span></div>
+        <p id="axis-label" class="eyebrow"></p>
+        <h2 id="question-text"></h2>
+        <div id="choices" class="choices-grid"></div>
+      </section>
+
+      <section id="result-screen" class="screen result-screen" hidden aria-labelledby="result-title">
+        <p class="eyebrow">ผลจากจักรวาลจำลอง</p>
+        <article id="result-card" class="result-card">
+          <div class="result-sticker" aria-hidden="true">✦</div>
+          <h2 id="result-title"></h2>
+          <p id="result-blurb"></p>
+          <dl>
+            <div><dt>สกิลเด่น</dt><dd id="result-power"></dd></div>
+            <div><dt>พลังหมดเมื่อ</dt><dd id="result-drain"></dd></div>
+            <div><dt>สกิลปาร์ตี้</dt><dd id="result-party"></dd></div>
+            <div><dt>คำเตือน</dt><dd id="result-warning"></dd></div>
+          </dl>
+        </article>
+        <div class="result-actions">
+          <button id="share-button" class="primary-button" type="button">แชร์การ์ดนี้ <span aria-hidden="true">↗</span></button>
+          <button id="download-button" class="secondary-button" type="button">บันทึกเป็นรูป</button>
+          <button id="restart-button" class="text-button" type="button">เล่นใหม่</button>
+        </div>
+      </section>
+    </main>
+    <canvas id="share-canvas" width="1080" height="1920" aria-hidden="true"></canvas>
+    <script type="module" src="js/app.js"></script>
+  </body>
+</html>
