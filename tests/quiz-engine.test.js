@@ -76,12 +76,17 @@ test('a quiz session replaces an earlier choice at the same question index', () 
   assert.deepEqual(session.answers(), [{ axis: 'EI', value: -2 }, { axis: 'SN', value: -1 }]);
 });
 
-test('every question art key has a semantic SVG scene', () => {
+test('every question art key has a handwritten inline SVG doodle', () => {
   const artKeys = [...new Set(questions.flatMap(({ choices }) => choices.map(({ art }) => art)))];
   assert.deepEqual(Object.keys(illustrations).sort(), artKeys.sort());
   artKeys.forEach((art) => {
     const scene = renderChoiceIllustration(art);
-    assert.match(scene, /choice-icon[\s\S]*aria-hidden="true"/);
+    assert.match(scene, /^<svg[\s\S]*class="choice-doodle"/);
+    assert.match(scene, /data-art="/);
+    assert.match(scene, /aria-hidden="true"/);
+    assert.match(scene, /stroke-linecap="round"/);
+    assert.match(scene, /<path[\s\S]*fill="none"/);
+    assert.doesNotMatch(scene, /choice-icon|icon-|lucide|<use[\s>]/);
     assert.doesNotMatch(scene, /<text[\s>]/);
   });
   assert.equal(new Set(artKeys.map(renderChoiceIllustration)).size, artKeys.length);

@@ -140,7 +140,16 @@ h1 em { color: var(--coral); font-style: normal; text-shadow: 3px 3px 0 var(--in
 .choice-card.is-selected { transform: translate(4px, 4px); box-shadow: 1px 1px 0 var(--ink); }
 
 .choice-art { display: grid; inline-size: 100%; block-size: 100%; place-items: center; }
-.choice-icon { color: var(--ink); font-size: clamp(4.25rem, 17vw, 6.6rem); line-height: 1; }
+.choice-doodle {
+  inline-size: clamp(5.6rem, 22vw, 8.2rem);
+  max-inline-size: 100%;
+  color: var(--ink);
+  filter: drop-shadow(2px 2px 0 rgb(255 255 255 / 42%));
+  transform: rotate(var(--doodle-tilt, -2deg));
+}
+.choice-card:nth-child(4n + 2) .choice-doodle { --doodle-tilt: 2deg; }
+.choice-card:nth-child(4n + 3) .choice-doodle { --doodle-tilt: -4deg; }
+.choice-card:nth-child(4n) .choice-doodle { --doodle-tilt: 3deg; }
 .choice-card > span:last-child { display: grid; inline-size: 100%; min-block-size: 2.5lh; place-items: center; text-wrap: balance; }
 
 .result-screen { display: flex; flex-direction: column; justify-content: center; }
