@@ -1,6 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { applyAnswer, calculateScores, emptyScores, getType } from '../js/quiz-engine.js';
+import { profiles, questions } from '../js/quiz-data.js';
+
+const axes = ['EI', 'SN', 'TF', 'JP'];
 
 test('emptyScores starts every axis at zero', () => {
   assert.deepEqual(emptyScores(), { EI: 0, SN: 0, TF: 0, JP: 0 });
@@ -33,4 +36,22 @@ test('getType resolves all 16 MBTI codes and resolves ties to the first axis let
   }
 
   assert.equal(getType(emptyScores()), 'ESTJ');
+});
+
+test('question data has 24 four-choice prompts split evenly across axes', () => {
+  assert.equal(questions.length, 24);
+  assert.deepEqual(
+    Object.fromEntries(axes.map((axis) => [axis, questions.filter((question) => question.axis === axis).length])),
+    { EI: 6, SN: 6, TF: 6, JP: 6 },
+  );
+  assert.ok(questions.every((question) => question.choices.length === 4));
+});
+
+test('a Thai profile exists for every MBTI code', () => {
+  const codes = ['ESTJ', 'ESFJ', 'ENTJ', 'ENFJ', 'ESTP', 'ESFP', 'ENTP', 'ENFP', 'ISTJ', 'ISFJ', 'INTJ', 'INFJ', 'ISTP', 'ISFP', 'INTP', 'INFP'];
+
+  assert.deepEqual(Object.keys(profiles).sort(), codes.sort());
+  assert.ok(Object.values(profiles).every(({ name, blurb, power, drain, party, warning }) =>
+    [name, blurb, power, drain, party, warning].every((value) => value.length > 0),
+  ));
 });
